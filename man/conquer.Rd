@@ -10,7 +10,7 @@ conquer(
   tau = 0.5,
   kernel = c("Gaussian", "uniform", "parabolic", "triangular"),
   h = 0,
-  standardize = TRUE,
+  checkSing = FALSE,
   tol = 1e-04,
   iteMax = 5000,
   ci = FALSE,
@@ -27,11 +27,11 @@ conquer(
 
 \item{kernel}{(\strong{optional})  A character string specifying the choice of kernel function. Default is "Gaussian". Other choices are "Gaussian", "uniform", "parabolic" or "triangular".}
 
-\item{h}{(\strong{optional}) The bandwidth parameter for kernel smoothing. Default is \eqn{max{((log(n) + p) / n)^0.4, 0.05}}. The default will be used if the input value is less than 0.05.}
+\item{h}{(\strong{optional}) The bandwidth parameter for kernel smoothing. Default is \eqn{max(((log(n) + p) / n)^{0.4}, 0.05)}. The default will be used if the input value is less than 0.05.}
 
-\item{standardize}{(\strong{optional}) A logical flag. Default is TRUE. If \code{standardize = TRUE}, then the design matrix will be standardized such that each column has mean zero and standard deviation one.}
+\item{checkSing}{(\strong{optional}) A logical flag. Default is FALSE. If \code{checkSing = TRUE}, then it will check if the design matrix is singular before running conquer.}
 
-\item{tol}{(\strong{optional}) Tolerance level of the gradient descent algorithm. The gradient descent algorithm terminates when the maximal entry of the gradient is less than \code{tol}. Default is 1e-05.}
+\item{tol}{(\strong{optional}) Tolerance level of the gradient descent algorithm. The gradient descent algorithm terminates when the maximal entry of the gradient is less than \code{tol}. Default is 1e-04.}
 
 \item{iteMax}{(\strong{optional}) Maximum number of iterations. Default is 5000.}
 
@@ -85,7 +85,7 @@ Barzilai, J. and Borwein, J. M. (1988). Two-point step size gradient methods. IM
 
 Fernandes, M., Guerre, E. and Horta, E. (2019). Smoothing quantile regressions. J. Bus. Econ. Statist., in press.
 
-He, X., Pan, X., Tan, K. M., and Zhou, W.-X. (2020). Smoothed quantile regression: Fast computation and bootstrap inference. Preprint.
+He, X., Pan, X., Tan, K. M., and Zhou, W.-X. (2020). Smoothed quantile regression for large-scale inference. Preprint.
 
 Koenker, R. and Bassett, G. (1978). Regression quantiles. Econometrica 46 33-50.
 }
