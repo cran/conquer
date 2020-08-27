@@ -4,7 +4,7 @@
 
 ## Description
 
-The `conquer` library performs fast and accurate convolution-type smoothed quantile regression ([Fernandes, Guerre and Horta, 2019](https://www.tandfonline.com/doi/full/10.1080/07350015.2019.1660177)) implemented via Barzilai-Borwein gradient descent ([Barzilai and Borwein, 1988](https://doi.org/10.1093/imanum/8.1.141)) with a Huber regression warm start. The package can also Construct confidence intervals for regression coefficients using multiplier bootstrap.
+The `conquer` library performs fast and accurate convolution-type smoothed quantile regression ([Fernandes, Guerre and Horta, 2019](https://www.tandfonline.com/doi/full/10.1080/07350015.2019.1660177)) implemented via Barzilai-Borwein gradient descent ([Barzilai and Borwein, 1988](https://doi.org/10.1093/imanum/8.1.141)) with a Huber regression warm start. The package can also construct confidence intervals for regression coefficients using multiplier bootstrap.
 
 ## Installation
 
@@ -14,11 +14,14 @@ The `conquer` library performs fast and accurate convolution-type smoothed quant
 install.packages("conquer")
 ```
 
-## Main function
+## Common errors or warnings
 
-The main functions of this library:
+A collection of error / warning messages we received from issues or e-mails and their solutions:
 
-* `conquer`: Convolution-type smoothed quantile regression
+* Error: smqr.cpp: 'quantile' is not a member of 'arma’. **Solution**: 'quantile' function is added into `RcppArmadillo` version 0.9.850.1.0 (2020-02-09), so reinstalling / updating the library `RcppArmadillo` will fix this issue.
+
+* Error: unable to load shared object.. Symbol not found: _EXTPTR_PTR. **Solution**: This issue is common in some specific versions of `R` when we load any Rcpp-based libraries. It is an error in R caused by a minor change about `EXTPTR_PTR`. Upgrading R to 4.0.2 will solve the problem.
+
 
 ## Examples
 
@@ -84,7 +87,7 @@ Barzilai, J. and Borwein, J. M. (1988). Two-point step size gradient methods. *I
 
 Fernandes, M., Guerre, E. and Horta, E. (2019). Smoothing quantile regressions. *J. Bus. Econ. Statist.*, in press. [Paper](https://www.tandfonline.com/doi/full/10.1080/07350015.2019.1660177)
 
-He, X., Pan, X., Tan, K. M., and Zhou, W.-X. (2020). Smoothed quantile regression for large-scale inference. Preprint.
+He, X., Pan, X., Tan, K. M., and Zhou, W.-X. (2020). Smoothed quantile regression with large-scale inference. Preprint.
 
 Horowitz, J. L. (1998). Bootstrap methods for median regression models. *Econometrica* **66** 1327–1351. [Paper](https://www.jstor.org/stable/2999619)
 
