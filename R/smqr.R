@@ -14,16 +14,20 @@ getNormCI = function(est, sd, z) {
 }
 
 #' @title Convolution-Type Smoothed Quantile Regression
-#' @description Estimation and inference for conditional linear quantile regression models using a convolution smoothed approach. Efficient gradient-based methods are employed for fitting both a single model and a regression process over a quantile range. Normal-based and (multiplier) bootstrap confidence intervals for all slope coefficients are constructed.
-#' @param X A \eqn{n} by \eqn{p} design matrix. Each row is a vector of observation with \eqn{p} covariates. Number of observations \eqn{n} must be greater than number of covariates \eqn{p}.
+#' @description Estimation and inference for conditional linear quantile regression models using a convolution smoothed approach. Efficient gradient-based methods are employed for fitting both a single model and a regression process over a quantile range. 
+#' Normal-based and (multiplier) bootstrap confidence intervals for all slope coefficients are constructed.
+#' @param X An \eqn{n} by \eqn{p} design matrix. Each row is a vector of observations with \eqn{p} covariates. Number of observations \eqn{n} must be greater than number of covariates \eqn{p}.
 #' @param Y An \eqn{n}-dimensional response vector.
 #' @param tau (\strong{optional}) The desired quantile level. Default is 0.5. Value must be between 0 and 1.
 #' @param kernel (\strong{optional})  A character string specifying the choice of kernel function. Default is "Gaussian". Choices are "Gaussian", "logistic", "uniform", "parabolic" and "triangular".
-#' @param h (\strong{optional}) Bandwidth/smoothing parameter. Default is \eqn{\max\{((log(n) + p) / n)^{0.4}, 0.05\}}. The default will be used if the input value is less than 0.05.
+#' @param h (\strong{optional}) Bandwidth/smoothing parameter. Default is \eqn{\max\{((log(n) + p) / n)^{0.4}, 0.05\}}. The default will be used if the input value is less than or equal to 0.05.
 #' @param checkSing (\strong{optional}) A logical flag. Default is FALSE. If \code{checkSing = TRUE}, then it will check if the design matrix is singular before running conquer. 
 #' @param tol (\strong{optional}) Tolerance level of the gradient descent algorithm. The iteration will stop when the maximum magnitude of all the elements of the gradient is less than \code{tol}. Default is 1e-04.
 #' @param iteMax (\strong{optional}) Maximum number of iterations. Default is 5000.
-#' @param ci (\strong{optional}) A logical flag. Default is FALSE. If \code{ci = TRUE}, then three types of confidence intervals (percentile, pivotal and normal) will be constructed via multiplier bootstrap.
+#' @param ci (\strong{optional}) A character string specifying methods to construct confidence intervals. Choices are "none" (default), "bootstrap", "asymptotic" and "both". If \code{ci = "none"}, then confidence intervals will not be constructed. 
+#' If \code{ci = "bootstrap"}, then three types of confidence intervals (percentile, pivotal and normal) will be constructed via multiplier bootstrap. 
+#' If \code{ci = "asymptotic"}, then confidence intervals will be constructed based on estimated asymptotic covariance matrix. 
+#' If \code{ci = "both"}, then confidence intervals from both bootstrap and asymptotic covariance will be returned.
 #' @param alpha (\strong{optional}) Miscoverage level for each confidence interval. Default is 0.05.
 #' @param B (\strong{optional}) The size of bootstrap samples. Default is 1000.
 #' @return An object containing the following items will be returned:
@@ -36,15 +40,15 @@ getNormCI = function(est, sd, z) {
 #' \item{\code{kernel}}{Kernel function.}
 #' \item{\code{n}}{Sample size.}
 #' \item{\code{p}}{Number of covariates.}
-#' \item{\code{perCI}}{The percentile confidence intervals for regression coefficients. Not available if \code{ci = FALSE}.}
-#' \item{\code{pivCI}}{The pivotal confidence intervals for regression coefficients. Not available if \code{ci = FALSE}.}
-#' \item{\code{normCI}}{The normal-based confidence intervals for regression coefficients. Not available if \code{ci = FALSE}.}
+#' \item{\code{perCI}}{The percentile confidence intervals for regression coefficients. Only available if \code{ci = "bootstrap"} or \code{ci = "both"}.}
+#' \item{\code{pivCI}}{The pivotal confidence intervals for regression coefficients. Only available if \code{ci = "bootstrap"} or \code{ci = "both"}.}
+#' \item{\code{normCI}}{The normal-based confidence intervals for regression coefficients. Only available if \code{ci = "bootstrap"} or \code{ci = "both"}.}
+#' \item{\code{asyCI}}{The asymptotic confidence intervals for regression coefficients. Only available if \code{ci = "asymptotic"} or \code{ci = "both"}.}
 #' }
-#' @references Barzilai, J. and Borwein, J. M. (1988). Two-point step size gradient methods. IMA J. Numer. Anal. 8 141–148.
-#' @references Fernandes, M., Guerre, E. and Horta, E. (2019). Smoothing quantile regressions. J. Bus. Econ. Statist., in press.
-#' @references He, X., Pan, X., Tan, K. M., and Zhou, W.-X. (2021+). Smoothed quantile regression for large-scale inference. J. Econometrics, in press.
-#' @references Koenker, R. and Bassett, G. (1978). Regression quantiles. Econometrica 46 33-50.
-#' @author Xuming He <xmhe@umich.edu>, Xiaoou Pan <xip024@ucsd.edu>, Kean Ming Tan <keanming@umich.edu>, and Wen-Xin Zhou <wez243@ucsd.edu>
+#' @references Barzilai, J. and Borwein, J. M. (1988). Two-point step size gradient methods. IMA J. Numer. Anal., 8, 141–148.
+#' @references Fernandes, M., Guerre, E. and Horta, E. (2021). Smoothing quantile regressions. J. Bus. Econ. Statist., 39, 338-357.
+#' @references He, X., Pan, X., Tan, K. M., and Zhou, W.-X. (2022+). Smoothed quantile regression for large-scale inference. J. Econometrics, in press.
+#' @references Koenker, R. and Bassett, G. (1978). Regression quantiles. Econometrica, 46, 33-50.
 #' @seealso See \code{\link{conquer.process}} for smoothed quantile regression process.
 #' @examples 
 #' n = 500; p = 10
@@ -61,13 +65,13 @@ getNormCI = function(est, sd, z) {
 #' beta.hat.unif = fit.unif$coeff
 #' 
 #' ## Construct three types of confidence intervals via multiplier bootstrap
-#' fit = conquer(X, Y, tau = 0.5, kernel = "Gaussian", ci = TRUE)
+#' fit = conquer(X, Y, tau = 0.5, kernel = "Gaussian", ci = "bootstrap")
 #' ci.per = fit$perCI
 #' ci.piv = fit$pivCI
 #' ci.norm = fit$normCI
 #' @export 
 conquer = function(X, Y, tau = 0.5, kernel = c("Gaussian", "logistic", "uniform", "parabolic", "triangular"), h = 0.0, checkSing = FALSE, tol = 0.0001, 
-                   iteMax = 5000, ci = FALSE, alpha = 0.05, B = 1000) {
+                   iteMax = 5000, ci = c("none", "bootstrap", "asymptotic", "both"), alpha = 0.05, B = 1000) {
   if (nrow(X) != length(Y)) {
     stop("Error: the length of Y must be the same as the number of rows of X.")
   }
@@ -87,7 +91,8 @@ conquer = function(X, Y, tau = 0.5, kernel = c("Gaussian", "logistic", "uniform"
     stop("Error: the design matrix X is singular.")
   }
   kernel = match.arg(kernel)
-  if (!ci) {
+  ci = match.arg(ci)
+  if (ci == "none") {
     rst = NULL
     if (kernel == "Gaussian") {
       rst = smqrGauss(X, Y, tau, h, tol = tol, iteMax = iteMax)
@@ -102,7 +107,7 @@ conquer = function(X, Y, tau = 0.5, kernel = c("Gaussian", "logistic", "uniform"
     }
     return (list(coeff = as.numeric(rst$coeff), ite = rst$ite, residual = as.numeric(rst$residual), bandwidth = rst$bandwidth, tau = tau, 
                  kernel = kernel, n = nrow(X), p = ncol(X)))
-  } else {
+  } else if (ci == "bootstrap") {
     rst = coeff = multiBeta = NULL
     if (kernel == "Gaussian") {
       rst = smqrGauss(X, Y, tau, h, tol = tol, iteMax = iteMax)
@@ -130,16 +135,88 @@ conquer = function(X, Y, tau = 0.5, kernel = c("Gaussian", "logistic", "uniform"
     normCI = as.matrix(getNormCI(coeff, rowSds(multiBeta), z))
     return (list(coeff = coeff, ite = rst$ite, residual = as.numeric(rst$residual), bandwidth = rst$bandwidth, tau = tau, kernel = kernel, 
                  n = nrow(X), p = ncol(X), perCI = as.matrix(ciList$perCI), pivCI = as.matrix(ciList$pivCI), normCI = normCI))
+  } else if (ci == "asymptotic") {
+    rst = coeff = NULL
+    if (kernel == "Gaussian") {
+      rst = smqrGauss(X, Y, tau, h, tol = tol, iteMax = iteMax)
+      coeff = as.numeric(rst$coeff)
+    } else if (kernel == "logistic") {
+      rst = smqrLogistic(X, Y, tau, h, tol = tol, iteMax = iteMax)
+      coeff = as.numeric(rst$coeff)
+    } else if (kernel == "uniform") {
+      rst = smqrUnif(X, Y, tau, h, tol = tol, iteMax = iteMax)
+      coeff = as.numeric(rst$coeff)
+    } else if (kernel == "parabolic") {
+      rst = smqrPara(X, Y, tau, h, tol = tol, iteMax = iteMax)
+      coeff = as.numeric(rst$coeff)
+    } else {
+      rst = smqrTrian(X, Y, tau, h, tol = tol, iteMax = iteMax)
+      coeff = as.numeric(rst$coeff)
+    }
+    res = as.numeric(rst$residual)
+    h = rst$bandwidth
+    n = nrow(X)
+    X1 = cbind(1, X)
+    Wh = diag(as.vector(pnorm(-res / h) - tau)^2)
+    Stau = t(X1) %*% Wh %*% X1 / n
+    Dh = t(X1) %*% diag(dnorm(res / h)) %*% X1 / (n * h)
+    Dhinv = solve(Dh)
+    z = qnorm(1 - alpha / 2)
+    tm = z * sqrt(diag(Dhinv %*% Stau %*% Dhinv) / n)
+    lower = coeff - tm
+    upper = coeff + tm
+    asyCI = as.matrix(cbind(lower, upper))
+    return (list(coeff = coeff, ite = rst$ite, residual = res, bandwidth = h, tau = tau, kernel = kernel, n = n, p = ncol(X), asyCI = asyCI))
+  } else {
+    rst = coeff = multiBeta = NULL
+    if (kernel == "Gaussian") {
+      rst = smqrGauss(X, Y, tau, h, tol = tol, iteMax = iteMax)
+      coeff = as.numeric(rst$coeff)
+      multiBeta = smqrGaussInf(X, Y, coeff, nrow(X), ncol(X), h, tau, B, tol, iteMax)
+    } else if (kernel == "logistic") {
+      rst = smqrLogistic(X, Y, tau, h, tol = tol, iteMax = iteMax)
+      coeff = as.numeric(rst$coeff)
+      multiBeta = smqrLogisticInf(X, Y, coeff, nrow(X), ncol(X), h, tau, B, tol, iteMax)
+    } else if (kernel == "uniform") {
+      rst = smqrUnif(X, Y, tau, h, tol = tol, iteMax = iteMax)
+      coeff = as.numeric(rst$coeff)
+      multiBeta = smqrUnifInf(X, Y, coeff, nrow(X), ncol(X), h, tau, B, tol, iteMax)
+    } else if (kernel == "parabolic") {
+      rst = smqrPara(X, Y, tau, h, tol = tol, iteMax = iteMax)
+      coeff = as.numeric(rst$coeff)
+      multiBeta = smqrParaInf(X, Y, coeff, nrow(X), ncol(X), h, tau, B, tol, iteMax)
+    } else {
+      rst = smqrTrian(X, Y, tau, h, tol = tol, iteMax = iteMax)
+      coeff = as.numeric(rst$coeff)
+      multiBeta = smqrTrianInf(X, Y, coeff, nrow(X), ncol(X), h, tau, B, tol, iteMax)
+    }
+    ciList = getPivCI(coeff, multiBeta, alpha)
+    z = qnorm(1 - alpha / 2)
+    normCI = as.matrix(getNormCI(coeff, rowSds(multiBeta), z))
+    res = as.numeric(rst$residual)
+    h = rst$bandwidth
+    n = nrow(X)
+    X1 = cbind(1, X)
+    Wh = diag(as.vector(pnorm(-res / h) - tau)^2)
+    Stau = t(X1) %*% Wh %*% X1 / n
+    Dh = t(X1) %*% diag(dnorm(res / h)) %*% X1 / (n * h)
+    Dhinv = solve(Dh)
+    tm = z * sqrt(diag(Dhinv %*% Stau %*% Dhinv) / n)
+    lower = coeff - tm
+    upper = coeff + tm
+    asyCI = as.matrix(cbind(lower, upper))
+    return (list(coeff = coeff, ite = rst$ite, residual = res, bandwidth = h, tau = tau, kernel = kernel, n = n, p = ncol(X), 
+                 perCI = as.matrix(ciList$perCI), pivCI = as.matrix(ciList$pivCI), normCI = normCI, asyCI = asyCI))
   }
 }
 
 #' @title Convolution-Type Smoothed Quantile Regression Process
 #' @description Fit a smoothed quantile regression process over a quantile range. The algorithm is essentially the same as \code{\link{conquer}}.
-#' @param X A \eqn{n} by \eqn{p} design matrix. Each row is a vector of observation with \eqn{p} covariates. Number of observations \eqn{n} must be greater than number of covariates \eqn{p}.
+#' @param X An \eqn{n} by \eqn{p} design matrix. Each row is a vector of observations with \eqn{p} covariates. Number of observations \eqn{n} must be greater than number of covariates \eqn{p}.
 #' @param Y An \eqn{n}-dimensional response vector.
 #' @param tauSeq (\strong{optional}) A sequence of quantile values (between 0 and 1). Default is \eqn{\{0.1, 0.15, 0.2, ..., 0.85, 0.9\}}.
 #' @param kernel (\strong{optional})  A character string specifying the choice of kernel function. Default is "Gaussian". Choices are "Gaussian", "logistic", "uniform", "parabolic" and "triangular".
-#' @param h (\strong{optional}) The bandwidth/smoothing parameter. Default is \eqn{\max\{((log(n) + p) / n)^{0.4}, 0.05\}}. The default will be used if the input value is less than 0.05.
+#' @param h (\strong{optional}) The bandwidth/smoothing parameter. Default is \eqn{\max\{((log(n) + p) / n)^{0.4}, 0.05\}}. The default will be used if the input value is less than or equal to 0.05.
 #' @param checkSing (\strong{optional}) A logical flag. Default is FALSE. If \code{checkSing = TRUE}, then it will check if the design matrix is singular before running conquer. 
 #' @param tol (\strong{optional}) Tolerance level of the gradient descent algorithm. The iteration will stop when the maximum magnitude of all the elements of the gradient is less than \code{tol}. Default is 1e-04.
 #' @param iteMax (\strong{optional}) Maximum number of iterations. Default is 5000.
@@ -152,11 +229,10 @@ conquer = function(X, Y, tau = 0.5, kernel = c("Gaussian", "logistic", "uniform"
 #' \item{\code{n}}{Sample size.}
 #' \item{\code{p}}{Number the covariates.}
 #' }
-#' @references Barzilai, J. and Borwein, J. M. (1988). Two-point step size gradient methods. IMA J. Numer. Anal. 8 141–148.
-#' @references Fernandes, M., Guerre, E. and Horta, E. (2019). Smoothing quantile regressions. J. Bus. Econ. Statist., in press.
-#' @references He, X., Pan, X., Tan, K. M., and Zhou, W.-X. (2021+). Smoothed quantile regression for large-scale inference. J. Econometrics, in press.
-#' @references Koenker, R. and Bassett, G. (1978). Regression quantiles. Econometrica 46 33-50.
-#' @author Xuming He <xmhe@umich.edu>, Xiaoou Pan <xip024@ucsd.edu>, Kean Ming Tan <keanming@umich.edu>, and Wen-Xin Zhou <wez243@ucsd.edu>
+#' @references Barzilai, J. and Borwein, J. M. (1988). Two-point step size gradient methods. IMA J. Numer. Anal., 8, 141–148.
+#' @references Fernandes, M., Guerre, E. and Horta, E. (2021). Smoothing quantile regressions. J. Bus. Econ. Statist., 39, 338-357.
+#' @references He, X., Pan, X., Tan, K. M., and Zhou, W.-X. (2022+). Smoothed quantile regression for large-scale inference. J. Econometrics, in press.
+#' @references Koenker, R. and Bassett, G. (1978). Regression quantiles. Econometrica, 46, 33-50.
 #' @seealso See \code{\link{conquer}} for single-index smoothed quantile regression.
 #' @examples 
 #' n = 500; p = 10
@@ -206,35 +282,47 @@ conquer.process = function(X, Y, tauSeq = seq(0.1, 0.9, by = 0.05), kernel = c("
 }
 
 #' @title Penalized Convolution-Type Smoothed Quantile Regression
-#' @description Fit sparse quantile regression models in high dimensions via regularized conquer methods with "lasso", "scad" and "mcp" penalties. For "scad" and "mcp", the iteratively reweighted \eqn{\ell_1}-penalized algorithm is complemented with a local adpative majorize-minimize algorithm.
-#' @param X A \eqn{n} by \eqn{p} design matrix. Each row is a vector of observation with \eqn{p} covariates. 
+#' @description Fit sparse quantile regression models in high dimensions via regularized conquer methods with "lasso", "elastic-net", "group lasso", "sparse group lasso", "scad" and "mcp" penalties. 
+#' For "scad" and "mcp", the iteratively reweighted \eqn{\ell_1}-penalized algorithm is complemented with a local adpative majorize-minimize algorithm.
+#' @param X An \eqn{n} by \eqn{p} design matrix. Each row is a vector of observations with \eqn{p} covariates. 
 #' @param Y An \eqn{n}-dimensional response vector.
-#' @param lambda (\strong{optional}) Regularization parameter. Default is 0.2.
+#' @param lambda (\strong{optional}) Regularization parameter. Can be a scalar or a sequence. If the input is a sequence, the function will sort it in ascending order, and run the regression accordingly. Default is 0.2.
 #' @param tau (\strong{optional}) Quantile level (between 0 and 1). Default is 0.5.
 #' @param kernel (\strong{optional}) A character string specifying the choice of kernel function. Default is "Gaussian". Choices are "Gaussian", "logistic", "uniform", "parabolic" and "triangular".
-#' @param h (\strong{optional}) Bandwidth/smoothing parameter. Default is \eqn{\max\{0.5 * (log(p) / n)^{0.25}, 0.05\}}.
-#' @param penalty (\strong{optional}) A character string specifying the penalty. Default is "lasso". The other two options are "scad" and "mcp".
-#' @param para (\strong{optional}) A constant parameter for "scad" and "mcp". Do not need to specify if the penalty is lasso. The default values are 3.7 for "scad" and 3 for "mcp".
+#' @param h (\strong{optional}) Bandwidth/smoothing parameter. Default is \eqn{\max\{0.5 * (log(p) / n)^{0.25}, 0.05\}}. The default will be used if the input value is less than or equal to 0.05.
+#' @param penalty (\strong{optional}) A character string specifying the penalty. Default is "lasso" (Tibshirani, 1996). The other options are "elastic" for elastic-net (Zou and Hastie, 2005), "group" for group lasso (Yuan and Lin, 2006), "sparse-group" for sparse group lasso (Simon et al., 2013), "scad" (Fan and Li, 2001) and "mcp" (Zhang, 2010).
+#' @param para.elastic (\strong{optional}) The mixing parameter between 0 and 1 (usually noted as \eqn{\alpha}) for elastic-net. The penalty is defined as \eqn{\alpha ||\beta||_1 + (1 - \alpha) ||\beta||_2^2}. Default is 0.5.
+#' Setting \code{para.elastic = 1} gives the lasso penalty, and setting \code{para.elastic = 0} yields the ridge penalty. Only specify it when \code{penalty = "elastic"}.
+#' @param group (\strong{optional}) A \eqn{p}-dimensional vector specifying group indices. Only specify it if \code{penalty = "group"} or \code{penalty = "sparse-group"}. 
+#' For example, if \eqn{p = 10}, and we assume the first 3 coefficients belong to the first group, and the last 7 coefficients belong to the second group, then the argument should be \code{group = c(rep(1, 3), rep(2, 7))}. If not specified, then the penalty will be the classical lasso.
+#' @param para.scad (\strong{optional}) The constant parameter for "scad". Default value is 3.7. Only specify it if \code{penalty = "scad"}.
+#' @param para.mcp (\strong{optional}) The constant parameter for "mcp". Default value is 3. Only specify it if \code{penalty = "mcp"}.
 #' @param epsilon (\strong{optional}) A tolerance level for the stopping rule. The iteration will stop when the maximum magnitude of the change of coefficient updates is less than \code{epsilon}. Default is 0.001.
 #' @param iteMax (\strong{optional}) Maximum number of iterations. Default is 500.
 #' @param phi0 (\strong{optional}) The initial quadratic coefficient parameter in the local adaptive majorize-minimize algorithm. Default is 0.01.
 #' @param gamma (\strong{optional}) The adaptive search parameter (greater than 1) in the local adaptive majorize-minimize algorithm. Default is 1.2.
-#' @param iteTight (\strong{optional}) Maximum number of tightening iterations in the iteratively reweighted \eqn{\ell_1}-penalized algorithm. Do not need to specify if the penalty is lasso. Default is 3.
+#' @param iteTight (\strong{optional}) Maximum number of tightening iterations in the iteratively reweighted \eqn{\ell_1}-penalized algorithm. Only specify it if the penalty is scad or mcp. Default is 3.
 #' @return An object containing the following items will be returned:
 #' \describe{
-#' \item{\code{coeff}}{A \eqn{(p + 1)} vector of estimated coefficients, including the intercept.}
+#' \item{\code{coeff}}{If the input \code{lambda} is a scalar, then \code{coeff} returns a \eqn{(p + 1)} vector of estimated coefficients, including the intercept. If the input \code{lambda} is a sequence, then \code{coeff} returns a \eqn{(p + 1)} by \eqn{nlambda} matrix, where \eqn{nlambda} refers to the length of \code{lambda} sequence.}
 #' \item{\code{bandwidth}}{Bandwidth value.}
 #' \item{\code{tau}}{Quantile level.}
 #' \item{\code{kernel}}{Kernel function.}
 #' \item{\code{penalty}}{Penalty type.}
-#' \item{\code{lambda}}{Regularization parameter.}
+#' \item{\code{lambda}}{Regularization parameter(s).}
 #' \item{\code{n}}{Sample size.}
 #' \item{\code{p}}{Number of the covariates.}
 #' }
-#' @references Fan, J., Liu, H., Sun, Q. and Zhang, T. (2018). I-LAMM for sparse learning: Simultaneous control of algorithmic complexity and statistical error. Ann. Statist. 46 814-841.
-#' @references Koenker, R. and Bassett, G. (1978). Regression quantiles. Econometrica 46 33-50.
-#' @references Tan, K. M., Wang, L. and Zhou, W.-X. (2021). High-dimensional quantile regression: convolution smoothing and concave regularization. J. Roy. Statist. Soc. Ser. B, to appear.
-#' @author Xuming He <xmhe@umich.edu>, Xiaoou Pan <xip024@ucsd.edu>, Kean Ming Tan <keanming@umich.edu>, and Wen-Xin Zhou <wez243@ucsd.edu>
+#' @references Belloni, A. and Chernozhukov, V. (2011). \eqn{\ell_1} penalized quantile regression in high-dimensional sparse models. Ann. Statist., 39, 82-130.
+#' @references Fan, J. and Li, R. (2001). Variable selection via nonconcave regularized likelihood and its oracle properties. J. Amer. Statist. Assoc., 96, 1348-1360.
+#' @references Fan, J., Liu, H., Sun, Q. and Zhang, T. (2018). I-LAMM for sparse learning: Simultaneous control of algorithmic complexity and statistical error. Ann. Statist., 46, 814-841.
+#' @references Koenker, R. and Bassett, G. (1978). Regression quantiles. Econometrica, 46, 33-50.
+#' @references Simon, N., Friedman, J., Hastie, T. and Tibshirani, R. (2013). A sparse-group lasso. J. Comp. Graph. Statist., 22, 231-245.
+#' @references Tibshirani, R. (1996). Regression shrinkage and selection via the lasso. J. R. Statist. Soc. Ser. B, 58, 267–288.
+#' @references Tan, K. M., Wang, L. and Zhou, W.-X. (2022). High-dimensional quantile regression: convolution smoothing and concave regularization. J. Roy. Statist. Soc. Ser. B, 84, 205-233.
+#' @references Yuan, M. and Lin, Y. (2006). Model selection and estimation in regression with grouped variables., J. Roy. Statist. Soc. Ser. B, 68, 49-67.
+#' @references Zhang, C.-H. (2010). Nearly unbiased variable selection under minimax concave penalty. Ann. Statist., 38, 894-942.
+#' @references Zou, H. and Hastie, T. (2005). Regularization and variable selection via the elastic net. J. R. Statist. Soc. Ser. B, 67, 301-320.
 #' @seealso See \code{\link{conquer.cv.reg}} for regularized quantile regression with cross-validation.
 #' @examples 
 #' n = 200; p = 500; s = 10
@@ -242,23 +330,38 @@ conquer.process = function(X, Y, tauSeq = seq(0.1, 0.9, by = 0.05), kernel = c("
 #' X = matrix(rnorm(n * p), n, p)
 #' Y = X %*% beta + rt(n, 2)
 #' 
-#' ## Regularized conquer with lasso penalty at tau = 0.8
-#' fit.lasso = conquer.reg(X, Y, lambda = 0.05, tau = 0.8, kernel = "Gaussian", penalty = "lasso")
+#' ## Regularized conquer with lasso penalty at tau = 0.7
+#' fit.lasso = conquer.reg(X, Y, lambda = 0.05, tau = 0.7, penalty = "lasso")
 #' beta.lasso = fit.lasso$coeff
 #' 
-#' #' ## Regularized conquer with scad penalty at tau = 0.8
-#' fit.scad = conquer.reg(X, Y, lambda = 0.13, tau = 0.8, kernel = "Gaussian", penalty = "scad")
+#' ## Regularized conquer with elastic-net penalty at tau = 0.7
+#' fit.elastic = conquer.reg(X, Y, lambda = 0.1, tau = 0.7, penalty = "elastic", para.elastic = 0.7)
+#' beta.elastic = fit.elastic$coeff
+#' 
+#' ## Regularized conquer with scad penalty at tau = 0.7
+#' fit.scad = conquer.reg(X, Y, lambda = 0.13, tau = 0.7, penalty = "scad")
 #' beta.scad = fit.scad$coeff
+#' 
+#' ## Regularized conquer with group lasso at tau = 0.7
+#' beta = c(rep(1.3, 5), rep(1.5, 5), rep(0, p - s))
+#' err = rt(n, 2)
+#' Y = X %*% beta + err
+#' group = c(rep(1, 5), rep(2, 5), rep(3, p - s))
+#' fit.group = conquer.reg(X, Y, lambda = 0.05, tau = 0.7, penalty = "group", group = group)
+#' beta.group = fit.group$coeff
 #' @export 
 conquer.reg = function(X, Y, lambda = 0.2, tau = 0.5, kernel = c("Gaussian", "logistic", "uniform", "parabolic", "triangular"), h = 0.0, 
-                       penalty = c("lasso", "scad", "mcp"), para = NULL, epsilon = 0.001, iteMax = 500, phi0 = 0.01, gamma = 1.2, iteTight = 3) {
-  if (nrow(X) != length(Y)) {
+                       penalty = c("lasso", "elastic", "group", "sparse-group", "scad", "mcp"), para.elastic = 0.5, group = NULL, para.scad = 3.7, 
+                       para.mcp = 3.0, epsilon = 0.001, iteMax = 500, phi0 = 0.01, gamma = 1.2, iteTight = 3) {
+  n = nrow(X)
+  p = ncol(X)
+  if (length(Y) != n) {
     stop("Error: the length of Y must be the same as the number of rows of X.")
   }
-  if(tau <= 0 || tau >= 1) {
+  if (tau <= 0 || tau >= 1) {
     stop("Error: the quantile level tau must be in (0, 1).")
   }
-  if (lambda <= 0) {
+  if (min(lambda) <= 0) {
     stop("Error: lambda must be positive.")
   }
   if (min(colSds(X)) == 0) {
@@ -266,60 +369,252 @@ conquer.reg = function(X, Y, lambda = 0.2, tau = 0.5, kernel = c("Gaussian", "lo
   }
   kernel = match.arg(kernel)
   penalty = match.arg(penalty)
-  n = nrow(X)
-  p = ncol(X)
   if (h <= 0.05) {
     h = max(0.5 * (log(p) / n)^(0.25), 0.05);
   }
-  type = 1
-  if (penalty == "lasso") {
-    para = 1.0
-  } else if (penalty == "scad") {
-    type = 2
-    if (is.null(para) || para <= 0) {
-      para = 3.7
-    }
-  } else if (penalty == "mcp") {
-    type = 3
-    if (is.null(para) || para <= 0) {
-      para = 3.0
-    }
-  }
   rst = NULL
-  if (kernel == "Gaussian") {
-    rst = conquerHdGauss(X, Y, lambda, tau, h, type, phi0, gamma, epsilon, iteMax, iteTight, para)
-  } else if (kernel == "logistic") {
-    rst = conquerHdLogistic(X, Y, lambda, tau, h, type, phi0, gamma, epsilon, iteMax, iteTight, para)
-  } else if (kernel == "uniform") {
-    rst = conquerHdUnif(X, Y, lambda, tau, h, type, phi0, gamma, epsilon, iteMax, iteTight, para)
-  } else if (kernel == "parabolic") {
-    rst = conquerHdPara(X, Y, lambda, tau, h, type, phi0, gamma, epsilon, iteMax, iteTight, para)
+  lambda = sort(lambda)
+  if (penalty == "lasso" || (penalty == "group" && is.null(group)) || (penalty == "sparse-group" && is.null(group))) {
+    if (kernel == "Gaussian") {
+      if (length(lambda) == 1) {
+        rst = conquerGaussLasso(X, Y, lambda, tau, h, phi0, gamma, epsilon, iteMax)
+      } else {
+        rst = conquerGaussLassoSeq(X, Y, lambda, tau, h, phi0, gamma, epsilon, iteMax)
+      }
+    } else if (kernel == "logistic") {
+      if (length(lambda) == 1) {
+        rst = conquerLogisticLasso(X, Y, lambda, tau, h, phi0, gamma, epsilon, iteMax)
+      } else {
+        rst = conquerLogisticLassoSeq(X, Y, lambda, tau, h, phi0, gamma, epsilon, iteMax)
+      }
+    } else if (kernel == "uniform") {
+      if (length(lambda) == 1) {
+        rst = conquerUnifLasso(X, Y, lambda, tau, h, phi0, gamma, epsilon, iteMax)
+      } else {
+        rst = conquerUnifLassoSeq(X, Y, lambda, tau, h, phi0, gamma, epsilon, iteMax)
+      }
+    } else if (kernel == "parabolic") {
+      if (length(lambda) == 1) {
+        rst = conquerParaLasso(X, Y, lambda, tau, h, phi0, gamma, epsilon, iteMax)
+      } else {
+        rst = conquerParaLassoSeq(X, Y, lambda, tau, h, phi0, gamma, epsilon, iteMax)
+      }
+    } else {
+      if (length(lambda) == 1) {
+        rst = conquerTrianLasso(X, Y, lambda, tau, h, phi0, gamma, epsilon, iteMax)
+      } else {
+        rst = conquerTrianLassoSeq(X, Y, lambda, tau, h, phi0, gamma, epsilon, iteMax)
+      }
+    }
+  } else if (penalty == "elastic") {
+    if (para.elastic < 0 || para.elastic > 1) {
+      stop("Error: the elastic net parameter must be in [0, 1].")
+    }
+    if (kernel == "Gaussian") {
+      if (length(lambda) == 1) {
+        rst = conquerGaussElastic(X, Y, lambda, tau, para.elastic, h, phi0, gamma, epsilon, iteMax)
+      } else {
+        rst = conquerGaussElasticSeq(X, Y, lambda, tau, para.elastic, h, phi0, gamma, epsilon, iteMax)
+      }
+    } else if (kernel == "logistic") {
+      if (length(lambda) == 1) {
+        rst = conquerLogisticElastic(X, Y, lambda, tau, para.elastic, h, phi0, gamma, epsilon, iteMax)
+      } else {
+        rst = conquerLogisticElasticSeq(X, Y, lambda, tau, para.elastic, h, phi0, gamma, epsilon, iteMax)
+      }
+    } else if (kernel == "uniform") {
+      if (length(lambda) == 1) {
+        rst = conquerUnifElastic(X, Y, lambda, tau, para.elastic, h, phi0, gamma, epsilon, iteMax)
+      } else {
+        rst = conquerUnifElasticSeq(X, Y, lambda, tau, para.elastic, h, phi0, gamma, epsilon, iteMax)
+      }
+    } else if (kernel == "parabolic") {
+      if (length(lambda) == 1) {
+        rst = conquerParaElastic(X, Y, lambda, tau, para.elastic, h, phi0, gamma, epsilon, iteMax)
+      } else {
+        rst = conquerParaElasticSeq(X, Y, lambda, tau, para.elastic, h, phi0, gamma, epsilon, iteMax)
+      }
+    } else {
+      if (length(lambda) == 1) {
+        rst = conquerTrianElastic(X, Y, lambda, tau, para.elastic, h, phi0, gamma, epsilon, iteMax)
+      } else {
+        rst = conquerTrianElasticSeq(X, Y, lambda, tau, para.elastic, h, phi0, gamma, epsilon, iteMax)
+      }
+    }
+  } else if (penalty == "group") {
+    if (length(group) != p) {
+      stop("Error: the argument group refers to the group indices, and its length must be the same as the number of columns of X.")
+    }
+    group = c(0, group - 1)
+    G = length(unique(group))
+    if (kernel == "Gaussian") {
+      if (length(lambda) == 1) {
+        rst = conquerGaussGroupLasso(X, Y, lambda, tau, group, G, h, phi0, gamma, epsilon, iteMax)
+      } else {
+        rst = conquerGaussGroupLassoSeq(X, Y, lambda, tau, group, G, h, phi0, gamma, epsilon, iteMax)
+      }
+    } else if (kernel == "logistic") {
+      if (length(lambda) == 1) {
+        rst = conquerLogisticGroupLasso(X, Y, lambda, tau, group, G, h, phi0, gamma, epsilon, iteMax)
+      } else {
+        rst = conquerLogisticGroupLassoSeq(X, Y, lambda, tau, group, G, h, phi0, gamma, epsilon, iteMax)
+      }
+    } else if (kernel == "uniform") {
+      if (length(lambda) == 1) {
+        rst = conquerUnifGroupLasso(X, Y, lambda, tau, group, G, h, phi0, gamma, epsilon, iteMax)
+      } else {
+        rst = conquerUnifGroupLassoSeq(X, Y, lambda, tau, group, G, h, phi0, gamma, epsilon, iteMax)
+      }
+    } else if (kernel == "parabolic") {
+      if (length(lambda) == 1) {
+        rst = conquerParaGroupLasso(X, Y, lambda, tau, group, G, h, phi0, gamma, epsilon, iteMax)
+      } else {
+        rst = conquerParaGroupLassoSeq(X, Y, lambda, tau, group, G, h, phi0, gamma, epsilon, iteMax)
+      }
+    } else {
+      if (length(lambda) == 1) {
+        rst = conquerTrianGroupLasso(X, Y, lambda, tau, group, G, h, phi0, gamma, epsilon, iteMax)
+      } else {
+        rst = conquerTrianGroupLassoSeq(X, Y, lambda, tau, group, G, h, phi0, gamma, epsilon, iteMax)
+      }
+    }
+  } else if (penalty == "sparse-group") {
+    if (length(group) != p) {
+      stop("Error: the argument group refers to the group indices, and its length must be the same as the number of columns of X.")
+    }
+    group = c(0, group - 1)
+    G = length(unique(group))
+    if (kernel == "Gaussian") {
+      if (length(lambda) == 1) {
+        rst = conquerGaussSparseGroupLasso(X, Y, lambda, tau, group, G, h, phi0, gamma, epsilon, iteMax)
+      } else {
+        rst = conquerGaussSparseGroupLassoSeq(X, Y, lambda, tau, group, G, h, phi0, gamma, epsilon, iteMax)
+      }
+    } else if (kernel == "logistic") {
+      if (length(lambda) == 1) {
+        rst = conquerLogisticSparseGroupLasso(X, Y, lambda, tau, group, G, h, phi0, gamma, epsilon, iteMax)
+      } else {
+        rst = conquerLogisticSparseGroupLassoSeq(X, Y, lambda, tau, group, G, h, phi0, gamma, epsilon, iteMax)
+      }
+    } else if (kernel == "uniform") {
+      if (length(lambda) == 1) {
+        rst = conquerUnifSparseGroupLasso(X, Y, lambda, tau, group, G, h, phi0, gamma, epsilon, iteMax)
+      } else {
+        rst = conquerUnifSparseGroupLassoSeq(X, Y, lambda, tau, group, G, h, phi0, gamma, epsilon, iteMax)
+      }
+    } else if (kernel == "parabolic") {
+      if (length(lambda) == 1) {
+        rst = conquerParaSparseGroupLasso(X, Y, lambda, tau, group, G, h, phi0, gamma, epsilon, iteMax)
+      } else {
+        rst = conquerParaSparseGroupLassoSeq(X, Y, lambda, tau, group, G, h, phi0, gamma, epsilon, iteMax)
+      }
+    } else {
+      if (length(lambda) == 1) {
+        rst = conquerTrianSparseGroupLasso(X, Y, lambda, tau, group, G, h, phi0, gamma, epsilon, iteMax)
+      } else {
+        rst = conquerTrianSparseGroupLassoSeq(X, Y, lambda, tau, group, G, h, phi0, gamma, epsilon, iteMax)
+      }
+    }
+  } else if (penalty == "scad") {
+    if (para.scad <= 0) {
+      stop("Error: the scad parameter must be positive.")
+    }
+    if (kernel == "Gaussian") {
+      if (length(lambda) == 1) {
+        rst = conquerGaussScad(X, Y, lambda, tau, h, phi0, gamma, epsilon, iteMax, iteTight, para.scad)
+      } else {
+        rst = conquerGaussScadSeq(X, Y, lambda, tau, h, phi0, gamma, epsilon, iteMax, iteTight, para.scad)
+      }
+    } else if (kernel == "logistic") {
+      if (length(lambda) == 1) {
+        rst = conquerLogisticScad(X, Y, lambda, tau, h, phi0, gamma, epsilon, iteMax, iteTight, para.scad)
+      } else {
+        rst = conquerLogisticScadSeq(X, Y, lambda, tau, h, phi0, gamma, epsilon, iteMax, iteTight, para.scad)
+      }
+    } else if (kernel == "uniform") {
+      if (length(lambda) == 1) {
+        rst = conquerUnifScad(X, Y, lambda, tau, h, phi0, gamma, epsilon, iteMax, iteTight, para.scad)
+      } else {
+        rst = conquerUnifScadSeq(X, Y, lambda, tau, h, phi0, gamma, epsilon, iteMax, iteTight, para.scad)
+      }
+    } else if (kernel == "parabolic") {
+      if (length(lambda) == 1) {
+        rst = conquerParaScad(X, Y, lambda, tau, h, phi0, gamma, epsilon, iteMax, iteTight, para.scad)
+      } else {
+        rst = conquerParaScadSeq(X, Y, lambda, tau, h, phi0, gamma, epsilon, iteMax, iteTight, para.scad)
+      }
+    } else {
+      if (length(lambda) == 1) {
+        rst = conquerTrianScad(X, Y, lambda, tau, h, phi0, gamma, epsilon, iteMax, iteTight, para.scad)
+      } else {
+        rst = conquerTrianScadSeq(X, Y, lambda, tau, h, phi0, gamma, epsilon, iteMax, iteTight, para.scad)
+      }
+    }
   } else {
-    rst = conquerHdTrian(X, Y, lambda, tau, h, type, phi0, gamma, epsilon, iteMax, iteTight, para)
-  }
+    if (para.mcp <= 0) {
+      stop("Error: the mcp parameter must be positive.")
+    }
+    if (kernel == "Gaussian") {
+      if (length(lambda) == 1) {
+        rst = conquerGaussMcp(X, Y, lambda, tau, h, phi0, gamma, epsilon, iteMax, iteTight, para.mcp)
+      } else {
+        rst = conquerGaussMcpSeq(X, Y, lambda, tau, h, phi0, gamma, epsilon, iteMax, iteTight, para.mcp)
+      }
+    } else if (kernel == "logistic") {
+      if (length(lambda) == 1) {
+        rst = conquerLogisticMcp(X, Y, lambda, tau, h, phi0, gamma, epsilon, iteMax, iteTight, para.mcp)
+      } else {
+        rst = conquerLogisticMcpSeq(X, Y, lambda, tau, h, phi0, gamma, epsilon, iteMax, iteTight, para.mcp)
+      }
+    } else if (kernel == "uniform") {
+      if (length(lambda) == 1) {
+        rst = conquerUnifMcp(X, Y, lambda, tau, h, phi0, gamma, epsilon, iteMax, iteTight, para.mcp)
+      } else {
+        rst = conquerUnifMcpSeq(X, Y, lambda, tau, h, phi0, gamma, epsilon, iteMax, iteTight, para.mcp)
+      }
+    } else if (kernel == "parabolic") {
+      if (length(lambda) == 1) {
+        rst = conquerParaMcp(X, Y, lambda, tau, h, phi0, gamma, epsilon, iteMax, iteTight, para.mcp)
+      } else {
+        rst = conquerParaMcpSeq(X, Y, lambda, tau, h, phi0, gamma, epsilon, iteMax, iteTight, para.mcp)
+      }
+    } else {
+      if (length(lambda) == 1) {
+        rst = conquerTrianMcp(X, Y, lambda, tau, h, phi0, gamma, epsilon, iteMax, iteTight, para.mcp)
+      } else {
+        rst = conquerTrianMcpSeq(X, Y, lambda, tau, h, phi0, gamma, epsilon, iteMax, iteTight, para.mcp)
+      }
+    }
+  } 
   return (list(coeff = as.numeric(rst), bandwidth = h, tau = tau, kernel = kernel, penalty = penalty, lambda = lambda, n = n, p = p))
 }
 
 #' @title Cross-Validated Penalized Convolution-Type Smoothed Quantile Regression
-#' @description Fit sparse quantile regression models via regularized conquer methods with "lasso", "scad" and "mcp" penalties. The regularization parameter \eqn{\lambda} is selected by cross-validation.
-#' @param X A \eqn{n} by \eqn{p} design matrix. Each row is a vector of observation with \eqn{p} covariates. 
+#' @description Fit sparse quantile regression models via regularized conquer methods with "lasso", "elastic-net", "group lasso", "sparse group lasso", "scad" and "mcp" penalties. The regularization parameter \eqn{\lambda} is selected via cross-validation.
+#' @param X An \eqn{n} by \eqn{p} design matrix. Each row is a vector of observations with \eqn{p} covariates. 
 #' @param Y An \eqn{n}-dimensional response vector.
-#' @param lambdaSeq (\strong{optional}) A sequence of candidate regularization parameters. If unspecified, the sequence will be generated by a simulated pivotal quantity approach proposed by Belloni and Chernozhukov (2011).
+#' @param lambdaSeq (\strong{optional}) A sequence of candidate regularization parameters. If unspecified, the sequence will be generated by a simulated pivotal quantity approach proposed in Belloni and Chernozhukov (2011).
 #' @param tau (\strong{optional}) Quantile level (between 0 and 1). Default is 0.5.
 #' @param kernel (\strong{optional}) A character string specifying the choice of kernel function. Default is "Gaussian". Choices are "Gaussian", "logistic", "uniform", "parabolic" and "triangular".
-#' @param h (\strong{optional}) The bandwidth parameter for kernel smoothing. Default is \eqn{\max\{0.5 * (log(p) / n)^{0.25}, 0.05\}}.
-#' @param penalty (\strong{optional}) A character string specifying the penalty. Default is "lasso". Choices are "lasso", "scad" or "mcp".
+#' @param h (\strong{optional}) The bandwidth parameter for kernel smoothing. Default is \eqn{\max\{0.5 * (log(p) / n)^{0.25}, 0.05\}}. The default will be used if the input value is less than or equal to 0.05.
+#' @param penalty (\strong{optional}) A character string specifying the penalty. Default is "lasso" (Tibshirani, 1996). The other options are "elastic" for elastic-net (Zou and Hastie, 2005), "group" for group lasso (Yuan and Lin, 2006), "sparse-group" for sparse group lasso (Simon et al., 2013), "scad" (Fan and Li, 2001) and "mcp" (Zhang, 2010).
 #' @param kfolds (\strong{optional}) Number of folds for cross-validation. Default is 5.
 #' @param numLambda (\strong{optional}) Number of \eqn{\lambda} values for cross-validation if \code{lambdaSeq} is unspeficied. Default is 50.
-#' @param para (\strong{optional}) A constant parameter for "scad" and "mcp". Do not need to specify if the penalty is lasso. The default values are 3.7 for "scad" and 3 for "mcp".
+#' @param para.elastic (\strong{optional}) The mixing parameter between 0 and 1 (usually noted as \eqn{\alpha}) for elastic net. The penalty is defined as \eqn{\alpha ||\beta||_1 + (1 - \alpha) ||\beta||_2^2}. Default is 0.5.
+#' Setting \code{para.elastic = 1} gives the lasso penalty, and setting \code{para.elastic = 0} yields the ridge penalty. Only specify it when \code{penalty = "elastic"}.
+#' @param group (\strong{optional}) A \eqn{p}-dimensional vector specifying group indices. Only specify it if \code{penalty = "group"} or \code{penalty = "sparse-group"}. 
+#' For example, if \eqn{p = 10}, and we assume the first 3 coefficients belong to the first group, and the last 7 coefficients belong to the second group, then the argument should be \code{group = c(rep(1, 3), rep(2, 7))}. If not specified, then the penalty will be the classical lasso.
+#' @param para.scad (\strong{optional}) The constant parameter for "scad". Default value is 3.7. Only specify it if \code{penalty = "scad"}.
+#' @param para.mcp (\strong{optional}) The constant parameter for "mcp". Default value is 3. Only specify it if \code{penalty = "mcp"}.
 #' @param epsilon (\strong{optional}) A tolerance level for the stopping rule. The iteration will stop when the maximum magnitude of the change of coefficient updates is less than \code{epsilon}. Default is 0.001.
 #' @param iteMax (\strong{optional}) Maximum number of iterations. Default is 500.
 #' @param phi0 (\strong{optional}) The initial quadratic coefficient parameter in the local adaptive majorize-minimize algorithm. Default is 0.01.
 #' @param gamma (\strong{optional}) The adaptive search parameter (greater than 1) in the local adaptive majorize-minimize algorithm. Default is 1.2.
-#' @param iteTight (\strong{optional}) Maximum number of tightening iterations in the iteratively reweighted \eqn{\ell_1}-penalized algorithm. Do not need to specify if the penalty is lasso. Default is 3.
+#' @param iteTight (\strong{optional}) Maximum number of tightening iterations in the iteratively reweighted \eqn{\ell_1}-penalized algorithm. Only specify it if the penalty is scad or mcp. Default is 3.
 #' @return An object containing the following items will be returned:
 #' \describe{
 #' \item{\code{coeff}}{A \eqn{(p + 1)} vector of estimated coefficients, including the intercept.}
+#' \item{\code{lambdaSeq}}{The sequence of regularization parameter candidates for cross-validation.}
 #' \item{\code{lambda}}{Regularization parameter selected by cross-validation.}
 #' \item{\code{bandwidth}}{Bandwidth value.}
 #' \item{\code{tau}}{Quantile level.}
@@ -328,30 +623,49 @@ conquer.reg = function(X, Y, lambda = 0.2, tau = 0.5, kernel = c("Gaussian", "lo
 #' \item{\code{n}}{Sample size.}
 #' \item{\code{p}}{Number of covariates.}
 #' }
-#' @references Belloni, A. and Chernozhukov, V. (2011). \eqn{\ell_1} penalized quantile regression in high-dimensional sparse models. Ann. Statist. 39 82-130.
-#' @references Fan, J., Liu, H., Sun, Q. and Zhang, T. (2018). I-LAMM for sparse learning: Simultaneous control of algorithmic complexity and statistical error. Ann. Statist. 46 814-841.
-#' @references Koenker, R. and Bassett, G. (1978). Regression quantiles. Econometrica 46 33-50.
-#' @references Tan, K. M., Wang, L. and Zhou, W.-X. (2021). High-dimensional quantile regression: convolution smoothing and concave regularization. J. Roy. Statist. Soc. Ser. B, to appear.
-#' @author Xuming He <xmhe@umich.edu>, Xiaoou Pan <xip024@ucsd.edu>, Kean Ming Tan <keanming@umich.edu>, and Wen-Xin Zhou <wez243@ucsd.edu>
+#' @references Belloni, A. and Chernozhukov, V. (2011). \eqn{\ell_1} penalized quantile regression in high-dimensional sparse models. Ann. Statist., 39, 82-130.
+#' @references Fan, J. and Li, R. (2001). Variable selection via nonconcave regularized likelihood and its oracle properties. J. Amer. Statist. Assoc., 96, 1348-1360.
+#' @references Fan, J., Liu, H., Sun, Q. and Zhang, T. (2018). I-LAMM for sparse learning: Simultaneous control of algorithmic complexity and statistical error. Ann. Statist., 46, 814-841.
+#' @references Koenker, R. and Bassett, G. (1978). Regression quantiles. Econometrica, 46, 33-50.
+#' @references Simon, N., Friedman, J., Hastie, T. and Tibshirani, R. (2013). A sparse-group lasso. J. Comp. Graph. Statist., 22, 231-245.
+#' @references Tibshirani, R. (1996). Regression shrinkage and selection via the lasso. J. R. Statist. Soc. Ser. B, 58, 267–288.
+#' @references Tan, K. M., Wang, L. and Zhou, W.-X. (2022). High-dimensional quantile regression: convolution smoothing and concave regularization. J. Roy. Statist. Soc. Ser. B, 84, 205-233.
+#' @references Yuan, M. and Lin, Y. (2006). Model selection and estimation in regression with grouped variables., J. Roy. Statist. Soc. Ser. B, 68, 49-67.
+#' @references Zhang, C.-H. (2010). Nearly unbiased variable selection under minimax concave penalty. Ann. Statist., 38, 894-942.
+#' @references Zou, H. and Hastie, T. (2005). Regularization and variable selection via the elastic net. J. R. Statist. Soc. Ser. B, 67, 301-320.
 #' @seealso See \code{\link{conquer.reg}} for regularized quantile regression with a prescribed \eqn{lambda}.
 #' @examples 
-#' n = 100; p = 100; s = 3
+#' n = 100; p = 200; s = 5
 #' beta = c(rep(1.5, s), rep(0, p - s))
 #' X = matrix(rnorm(n * p), n, p)
 #' Y = X %*% beta + rt(n, 2)
 #' 
-#' ## Cross-validated regularized conquer with lasso penalty at tau = 0.8
-#' fit.lasso = conquer.cv.reg(X, Y, tau = 0.8, kernel = "Gaussian", penalty = "lasso")
+#' ## Cross-validated regularized conquer with lasso penalty at tau = 0.7
+#' fit.lasso = conquer.cv.reg(X, Y, tau = 0.7, penalty = "lasso")
 #' beta.lasso = fit.lasso$coeff
 #' 
-#' #' ## Cross-validated regularized conquer with scad penalty at tau = 0.8
-#' fit.scad = conquer.cv.reg(X, Y,tau = 0.8, kernel = "Gaussian", penalty = "scad")
+#' ## Cross-validated regularized conquer with elastic-net penalty at tau = 0.7
+#' fit.elastic = conquer.cv.reg(X, Y, tau = 0.7, penalty = "elastic", para.elastic = 0.7)
+#' beta.elastic = fit.elastic$coeff
+#' 
+#' ## Cross-validated regularized conquer with scad penalty at tau = 0.7
+#' fit.scad = conquer.cv.reg(X, Y, tau = 0.7, penalty = "scad")
 #' beta.scad = fit.scad$coeff
+#' 
+#' ## Regularized conquer with group lasso at tau = 0.7
+#' beta = c(rep(1.3, 2), rep(1.5, 3), rep(0, p - s))
+#' err = rt(n, 2)
+#' Y = X %*% beta + err
+#' group = c(rep(1, 2), rep(2, 3), rep(3, p - s))
+#' fit.group = conquer.cv.reg(X, Y,tau = 0.7, penalty = "group", group = group)
+#' beta.group = fit.group$coeff
 #' @export 
 conquer.cv.reg = function(X, Y, lambdaSeq = NULL, tau = 0.5, kernel = c("Gaussian", "logistic", "uniform", "parabolic", "triangular"), h = 0.0, 
-                          penalty = c("lasso", "scad", "mcp"), kfolds = 5, numLambda = 50, para = NULL, epsilon = 0.001, iteMax = 500, phi0 = 0.01, 
-                          gamma = 1.2, iteTight = 3) {
-  if (nrow(X) != length(Y)) {
+                          penalty = c("lasso", "elastic", "group", "sparse-group", "scad", "mcp"), para.elastic = 0.5, group = NULL, para.scad = 3.7, 
+                          para.mcp = 3.0, kfolds = 5, numLambda = 50, epsilon = 0.001, iteMax = 500, phi0 = 0.01, gamma = 1.2, iteTight = 3) {
+  n = nrow(X)
+  p = ncol(X)
+  if (length(Y) != n) {
     stop("Error: the length of Y must be the same as the number of rows of X.")
   }
   if(tau <= 0 || tau >= 1) {
@@ -365,69 +679,118 @@ conquer.cv.reg = function(X, Y, lambdaSeq = NULL, tau = 0.5, kernel = c("Gaussia
   }
   kernel = match.arg(kernel)
   penalty = match.arg(penalty)
-  n = nrow(X)
-  p = ncol(X)
   if (h <= 0.05) {
     h = max(0.5 * (log(p) / n)^(0.25), 0.05);
   }
   if (is.null(lambdaSeq)) {
+    if (numLambda == 1) {
+      stop("Error: numLambda must be greater than 1 for cross-validation.")
+    }
     nsim = 200
     U = matrix(runif(nsim * n), nsim, n)
     pivot = tau - (U <= tau)
     lambda0 = quantile(rowMaxs(abs(pivot %*% scale(X))), 0.9) / n
-    lambdaSeq = seq(0.5, 1.5, length.out = numLambda) * lambda0
-  } 
-  if (penalty == "scad" && is.null(para)) {
-    para = 3.7
-  } else if (penalty == "mcp" && is.null(para)) {
-    para = 3.0
+    lambdaSeq = seq(0.05, 2, length.out = numLambda) * lambda0
+  } else if (length(lambdaSeq) == 1) {
+    stop("Error: lambdaSeq must be a sequence. Please use conquer.reg instead for a specific lambda.")
+  } else {
+    lambdaSeq = sort(lambdaSeq)
   }
   folds = sample(rep(1:kfolds, ceiling(n / kfolds)), n)
   rst = NULL
-  if (kernel == "Gaussian") {
-    if (penalty == "lasso") {
-      rst = cvSmqrLassoGauss(X, Y, lambdaSeq, folds, tau, kfolds, h, phi0, gamma, epsilon, iteMax)
-    } else if (penalty == "scad") {
-      rst = cvSmqrScadGauss(X, Y, lambdaSeq, folds, tau, kfolds, h, phi0, gamma, epsilon, iteMax, iteTight, para)
+  if (penalty == "lasso" || (penalty == "group" && is.null(group)) || (penalty == "sparse-group" && is.null(group))) {
+    if (kernel == "Gaussian") {
+      rst = cvGaussLassoWarm(X, Y, lambdaSeq, folds, tau, kfolds, h, phi0, gamma, epsilon, iteMax)
+    } else if (kernel == "logistic") {
+      rst = cvLogisticLassoWarm(X, Y, lambdaSeq, folds, tau, kfolds, h, phi0, gamma, epsilon, iteMax)
+    } else if (kernel == "uniform") {
+      rst = cvUnifLassoWarm(X, Y, lambdaSeq, folds, tau, kfolds, h, phi0, gamma, epsilon, iteMax)
+    } else if (kernel == "parabolic") {
+      rst = cvParaLassoWarm(X, Y, lambdaSeq, folds, tau, kfolds, h, phi0, gamma, epsilon, iteMax)
     } else {
-      rst = cvSmqrMcpGauss(X, Y, lambdaSeq, folds, tau, kfolds, h, phi0, gamma, epsilon, iteMax, iteTight, para)
+      rst = cvTrianLassoWarm(X, Y, lambdaSeq, folds, tau, kfolds, h, phi0, gamma, epsilon, iteMax)
     }
-  } else if (kernel == "logistic") {
-    if (penalty == "lasso") {
-      rst = cvSmqrLassoLogistic(X, Y, lambdaSeq, folds, tau, kfolds, h, phi0, gamma, epsilon, iteMax)
-    } else if (penalty == "scad") {
-      rst = cvSmqrScadLogistic(X, Y, lambdaSeq, folds, tau, kfolds, h, phi0, gamma, epsilon, iteMax, iteTight, para)
-    } else {
-      rst = cvSmqrMcpLogistic(X, Y, lambdaSeq, folds, tau, kfolds, h, phi0, gamma, epsilon, iteMax, iteTight, para)
+  } else if (penalty == "elastic") {
+    if (para.elastic < 0 || para.elastic > 1) {
+      stop("Error: the elastic net parameter must be in [0, 1].")
     }
-  } else if (kernel == "uniform") {
-    if (penalty == "lasso") {
-      rst = cvSmqrLassoUnif(X, Y, lambdaSeq, folds, tau, kfolds, h, phi0, gamma, epsilon, iteMax)
-    } else if (penalty == "scad") {
-      rst = cvSmqrScadUnif(X, Y, lambdaSeq, folds, tau, kfolds, h, phi0, gamma, epsilon, iteMax, iteTight, para)
+    if (kernel == "Gaussian") {
+      rst = cvGaussElasticWarm(X, Y, lambdaSeq, folds, tau, para.elastic, kfolds, h, phi0, gamma, epsilon, iteMax)
+    } else if (kernel == "logistic") {
+      rst = cvLogisticElasticWarm(X, Y, lambdaSeq, folds, tau, para.elastic, kfolds, h, phi0, gamma, epsilon, iteMax)
+    } else if (kernel == "uniform") {
+      rst = cvUnifElasticWarm(X, Y, lambdaSeq, folds, tau, para.elastic, kfolds, h, phi0, gamma, epsilon, iteMax)
+    } else if (kernel == "parabolic") {
+      rst = cvParaElasticWarm(X, Y, lambdaSeq, folds, tau, para.elastic, kfolds, h, phi0, gamma, epsilon, iteMax)
     } else {
-      rst = cvSmqrMcpUnif(X, Y, lambdaSeq, folds, tau, kfolds, h, phi0, gamma, epsilon, iteMax, iteTight, para)
+      rst = cvTrianElasticWarm(X, Y, lambdaSeq, folds, tau, para.elastic, kfolds, h, phi0, gamma, epsilon, iteMax)
     }
-  } else if (kernel == "parabolic") {
-    if (penalty == "lasso") {
-      rst = cvSmqrLassoPara(X, Y, lambdaSeq, folds, tau, kfolds, h, phi0, gamma, epsilon, iteMax)
-    } else if (penalty == "scad") {
-      rst = cvSmqrScadPara(X, Y, lambdaSeq, folds, tau, kfolds, h, phi0, gamma, epsilon, iteMax, iteTight, para)
+  } else if (penalty == "group") {
+    if (length(group) != p) {
+      stop("Error: the argument group refers to the group indices, and its length must be the same as the number of columns of X.")
+    }
+    group = c(0, group - 1)
+    G = length(unique(group))
+    if (kernel == "Gaussian") {
+      rst = cvGaussGroupLassoWarm(X, Y, lambdaSeq, folds, tau, kfolds, group, G, h, phi0, gamma, epsilon, iteMax)
+    } else if (kernel == "logistic") {
+      rst = cvLogisticGroupLassoWarm(X, Y, lambdaSeq, folds, tau, kfolds, group, G, h, phi0, gamma, epsilon, iteMax)
+    } else if (kernel == "uniform") {
+      rst = cvUnifGroupLassoWarm(X, Y, lambdaSeq, folds, tau, kfolds, group, G, h, phi0, gamma, epsilon, iteMax)
+    } else if (kernel == "parabolic") {
+      rst = cvParaGroupLassoWarm(X, Y, lambdaSeq, folds, tau, kfolds, group, G, h, phi0, gamma, epsilon, iteMax)
     } else {
-      rst = cvSmqrMcpPara(X, Y, lambdaSeq, folds, tau, kfolds, h, phi0, gamma, epsilon, iteMax, iteTight, para)
+      rst = cvTrianGroupLassoWarm(X, Y, lambdaSeq, folds, tau, kfolds, group, G, h, phi0, gamma, epsilon, iteMax)
+    }
+  } else if (penalty == "sparse-group") {
+    if (length(group) != p) {
+      stop("Error: the argument group refers to the group indices, and its length must be the same as the number of columns of X.")
+    }
+    group = c(0, group - 1)
+    G = length(unique(group))
+    if (kernel == "Gaussian") {
+      rst = cvGaussSparseGroupLassoWarm(X, Y, lambdaSeq, folds, tau, kfolds, group, G, h, phi0, gamma, epsilon, iteMax)
+    } else if (kernel == "logistic") {
+      rst = cvLogisticSparseGroupLassoWarm(X, Y, lambdaSeq, folds, tau, kfolds, group, G, h, phi0, gamma, epsilon, iteMax)
+    } else if (kernel == "uniform") {
+      rst = cvUnifSparseGroupLassoWarm(X, Y, lambdaSeq, folds, tau, kfolds, group, G, h, phi0, gamma, epsilon, iteMax)
+    } else if (kernel == "parabolic") {
+      rst = cvParaSparseGroupLassoWarm(X, Y, lambdaSeq, folds, tau, kfolds, group, G, h, phi0, gamma, epsilon, iteMax)
+    } else {
+      rst = cvTrianSparseGroupLassoWarm(X, Y, lambdaSeq, folds, tau, kfolds, group, G, h, phi0, gamma, epsilon, iteMax)
+    }
+  } else if (penalty == "scad") {
+    if (para.scad <= 0) {
+      stop("Error: the scad parameter must be positive.")
+    }
+    if (kernel == "Gaussian") {
+      rst = cvGaussScadWarm(X, Y, lambdaSeq, folds, tau, kfolds, h, phi0, gamma, epsilon, iteMax, iteTight, para.scad)
+    } else if (kernel == "logistic") {
+      rst = cvLogisticScadWarm(X, Y, lambdaSeq, folds, tau, kfolds, h, phi0, gamma, epsilon, iteMax, iteTight, para.scad)
+    } else if (kernel == "uniform") {
+      rst = cvUnifScadWarm(X, Y, lambdaSeq, folds, tau, kfolds, h, phi0, gamma, epsilon, iteMax, iteTight, para.scad)
+    } else if (kernel == "parabolic") {
+      rst = cvParaScadWarm(X, Y, lambdaSeq, folds, tau, kfolds, h, phi0, gamma, epsilon, iteMax, iteTight, para.scad)
+    } else {
+      rst = cvTrianScadWarm(X, Y, lambdaSeq, folds, tau, kfolds, h, phi0, gamma, epsilon, iteMax, iteTight, para.scad)
     }
   } else {
-    if (penalty == "lasso") {
-      rst = cvSmqrLassoTrian(X, Y, lambdaSeq, folds, tau, kfolds, h, phi0, gamma, epsilon, iteMax)
-    } else if (penalty == "scad") {
-      rst = cvSmqrScadTrian(X, Y, lambdaSeq, folds, tau, kfolds, h, phi0, gamma, epsilon, iteMax, iteTight, para)
-    } else {
-      rst = cvSmqrMcpTrian(X, Y, lambdaSeq, folds, tau, kfolds, h, phi0, gamma, epsilon, iteMax, iteTight, para)
+    if (para.mcp <= 0) {
+      stop("Error: the mcp parameter must be positive.")
     }
-  }
-  return (list(coeff = as.numeric(rst$coeff), lambda = rst$lambda, bandwidth = h, tau = tau, kernel = kernel, penalty = penalty, n = n, p = p))
+    if (kernel == "Gaussian") {
+      rst = cvGaussMcpWarm(X, Y, lambdaSeq, folds, tau, kfolds, h, phi0, gamma, epsilon, iteMax, iteTight, para.mcp)
+    } else if (kernel == "logistic") {
+      rst = cvLogisticMcpWarm(X, Y, lambdaSeq, folds, tau, kfolds, h, phi0, gamma, epsilon, iteMax, iteTight, para.mcp)
+    } else if (kernel == "uniform") {
+      rst = cvUnifMcpWarm(X, Y, lambdaSeq, folds, tau, kfolds, h, phi0, gamma, epsilon, iteMax, iteTight, para.mcp)
+    } else if (kernel == "parabolic") {
+      rst = cvParaMcpWarm(X, Y, lambdaSeq, folds, tau, kfolds, h, phi0, gamma, epsilon, iteMax, iteTight, para.mcp)
+    } else {
+      rst = cvTrianMcpWarm(X, Y, lambdaSeq, folds, tau, kfolds, h, phi0, gamma, epsilon, iteMax, iteTight, para.mcp)
+    }
+  } 
+  return (list(coeff = as.numeric(rst$coeff), lambdaSeq = lambdaSeq, lambda = rst$lambda, bandwidth = h, tau = tau, kernel = kernel, 
+               penalty = penalty, n = n, p = p))
 }
-
-
-
 

@@ -16,7 +16,7 @@ conquer.process(
 )
 }
 \arguments{
-\item{X}{A \eqn{n} by \eqn{p} design matrix. Each row is a vector of observation with \eqn{p} covariates. Number of observations \eqn{n} must be greater than number of covariates \eqn{p}.}
+\item{X}{An \eqn{n} by \eqn{p} design matrix. Each row is a vector of observations with \eqn{p} covariates. Number of observations \eqn{n} must be greater than number of covariates \eqn{p}.}
 
 \item{Y}{An \eqn{n}-dimensional response vector.}
 
@@ -24,7 +24,7 @@ conquer.process(
 
 \item{kernel}{(\strong{optional})  A character string specifying the choice of kernel function. Default is "Gaussian". Choices are "Gaussian", "logistic", "uniform", "parabolic" and "triangular".}
 
-\item{h}{(\strong{optional}) The bandwidth/smoothing parameter. Default is \eqn{\max\{((log(n) + p) / n)^{0.4}, 0.05\}}. The default will be used if the input value is less than 0.05.}
+\item{h}{(\strong{optional}) The bandwidth/smoothing parameter. Default is \eqn{\max\{((log(n) + p) / n)^{0.4}, 0.05\}}. The default will be used if the input value is less than or equal to 0.05.}
 
 \item{checkSing}{(\strong{optional}) A logical flag. Default is FALSE. If \code{checkSing = TRUE}, then it will check if the design matrix is singular before running conquer.}
 
@@ -61,17 +61,14 @@ fit.unif = conquer.process(X, Y, tauSeq = seq(0.2, 0.8, by = 0.05), kernel = "un
 beta.hat.unif = fit.unif$coeff
 }
 \references{
-Barzilai, J. and Borwein, J. M. (1988). Two-point step size gradient methods. IMA J. Numer. Anal. 8 141–148.
+Barzilai, J. and Borwein, J. M. (1988). Two-point step size gradient methods. IMA J. Numer. Anal., 8, 141–148.
 
-Fernandes, M., Guerre, E. and Horta, E. (2019). Smoothing quantile regressions. J. Bus. Econ. Statist., in press.
+Fernandes, M., Guerre, E. and Horta, E. (2021). Smoothing quantile regressions. J. Bus. Econ. Statist., 39, 338-357.
 
-He, X., Pan, X., Tan, K. M., and Zhou, W.-X. (2021+). Smoothed quantile regression for large-scale inference. J. Econometrics, in press.
+He, X., Pan, X., Tan, K. M., and Zhou, W.-X. (2022+). Smoothed quantile regression for large-scale inference. J. Econometrics, in press.
 
-Koenker, R. and Bassett, G. (1978). Regression quantiles. Econometrica 46 33-50.
+Koenker, R. and Bassett, G. (1978). Regression quantiles. Econometrica, 46, 33-50.
 }
 \seealso{
 See \code{\link{conquer}} for single-index smoothed quantile regression.
-}
-\author{
-Xuming He <xmhe@umich.edu>, Xiaoou Pan <xip024@ucsd.edu>, Kean Ming Tan <keanming@umich.edu>, and Wen-Xin Zhou <wez243@ucsd.edu>
 }
