@@ -522,7 +522,7 @@ arma::mat conquerLogisticElasticSeq(const arma::mat& X, arma::vec Y, const arma:
 }
 
 // [[Rcpp::export]]
-arma::vec conquerLogisticGroupLasso(const arma::mat& X, arma::vec Y, const double lambda, const double tau, const arma::vec& group, const int G, 
+arma::vec conquerLogisticGroupLasso(const arma::mat& X, arma::vec Y, const double lambda, const double tau, const arma::vec& group, const arma::vec& weight, const int G, 
                                     const double h, const double phi0 = 0.01, const double gamma = 1.2, const double epsilon = 0.001, const int iteMax = 500) {
   const int n = X.n_rows, p = X.n_cols;
   const double h1 = 1.0 / h;
@@ -531,11 +531,6 @@ arma::vec conquerLogisticGroupLasso(const arma::mat& X, arma::vec Y, const doubl
   arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
   double my = arma::mean(Y);
   Y -= my;
-  arma::vec weight = arma::zeros(G);
-  for (int i = 1; i <= p; i++) {
-    weight(group(i)) += 1;
-  }
-  weight = arma::sqrt(weight);
   arma::vec betaHat = logisticGroupLasso(Z, Y, lambda, tau, group, weight, p, G, 1.0 / n, h, h1, phi0, gamma, epsilon, iteMax);
   betaHat.rows(1, p) %= sx1;
   betaHat(0) += my - arma::as_scalar(mx * betaHat.rows(1, p));
@@ -543,7 +538,7 @@ arma::vec conquerLogisticGroupLasso(const arma::mat& X, arma::vec Y, const doubl
 }
 
 // [[Rcpp::export]]
-arma::mat conquerLogisticGroupLassoSeq(const arma::mat& X, arma::vec Y, const arma::vec& lambdaSeq, const double tau, const arma::vec& group, const int G, 
+arma::mat conquerLogisticGroupLassoSeq(const arma::mat& X, arma::vec Y, const arma::vec& lambdaSeq, const double tau, const arma::vec& group, const arma::vec& weight, const int G, 
                                        const double h, const double phi0 = 0.01, const double gamma = 1.2, const double epsilon = 0.001, const int iteMax = 500) {
   const int n = X.n_rows, p = X.n_cols, nlambda = lambdaSeq.size();
   const double h1 = 1.0 / h, n1 = 1.0 / n;
@@ -552,11 +547,6 @@ arma::mat conquerLogisticGroupLassoSeq(const arma::mat& X, arma::vec Y, const ar
   arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
   double my = arma::mean(Y);
   Y -= my;
-  arma::vec weight = arma::zeros(G);
-  for (int i = 1; i <= p; i++) {
-    weight(group(i)) += 1;
-  }
-  weight = arma::sqrt(weight);
   arma::mat betaSeq(p + 1, nlambda);
   arma::vec betaHat = logisticGroupLasso(Z, Y, lambdaSeq(0), tau, group, weight, p, G, n1, h, h1, phi0, gamma, epsilon, iteMax);
   arma::vec betaWarm = betaHat;
@@ -570,7 +560,7 @@ arma::mat conquerLogisticGroupLassoSeq(const arma::mat& X, arma::vec Y, const ar
 }
 
 // [[Rcpp::export]]
-arma::vec conquerLogisticSparseGroupLasso(const arma::mat& X, arma::vec Y, const double lambda, const double tau, const arma::vec& group, const int G, 
+arma::vec conquerLogisticSparseGroupLasso(const arma::mat& X, arma::vec Y, const double lambda, const double tau, const arma::vec& group, const arma::vec& weight, const int G, 
                                           const double h, const double phi0 = 0.01, const double gamma = 1.2, const double epsilon = 0.001, 
                                           const int iteMax = 500) {
   const int n = X.n_rows, p = X.n_cols;
@@ -580,11 +570,6 @@ arma::vec conquerLogisticSparseGroupLasso(const arma::mat& X, arma::vec Y, const
   arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
   double my = arma::mean(Y);
   Y -= my;
-  arma::vec weight = arma::zeros(G);
-  for (int i = 1; i <= p; i++) {
-    weight(group(i)) += 1;
-  }
-  weight = arma::sqrt(weight);
   arma::vec betaHat = logisticSparseGroupLasso(Z, Y, lambda, tau, group, weight, p, G, 1.0 / n, h, h1, phi0, gamma, epsilon, iteMax);
   betaHat.rows(1, p) %= sx1;
   betaHat(0) += my - arma::as_scalar(mx * betaHat.rows(1, p));
@@ -592,7 +577,7 @@ arma::vec conquerLogisticSparseGroupLasso(const arma::mat& X, arma::vec Y, const
 }
 
 // [[Rcpp::export]]
-arma::mat conquerLogisticSparseGroupLassoSeq(const arma::mat& X, arma::vec Y, const arma::vec& lambdaSeq, const double tau, const arma::vec& group, 
+arma::mat conquerLogisticSparseGroupLassoSeq(const arma::mat& X, arma::vec Y, const arma::vec& lambdaSeq, const double tau, const arma::vec& group, const arma::vec& weight, 
                                              const int G, const double h, const double phi0 = 0.01, const double gamma = 1.2, const double epsilon = 0.001, 
                                              const int iteMax = 500) {
   const int n = X.n_rows, p = X.n_cols, nlambda = lambdaSeq.size();
@@ -602,11 +587,6 @@ arma::mat conquerLogisticSparseGroupLassoSeq(const arma::mat& X, arma::vec Y, co
   arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
   double my = arma::mean(Y);
   Y -= my;
-  arma::vec weight = arma::zeros(G);
-  for (int i = 1; i <= p; i++) {
-    weight(group(i)) += 1;
-  }
-  weight = arma::sqrt(weight);
   arma::mat betaSeq(p + 1, nlambda);
   arma::vec betaHat = logisticSparseGroupLasso(Z, Y, lambdaSeq(0), tau, group, weight, p, G, n1, h, h1, phi0, gamma, epsilon, iteMax);
   arma::vec betaWarm = betaHat;
@@ -702,43 +682,13 @@ arma::mat conquerLogisticMcpSeq(const arma::mat& X, arma::vec Y, const arma::vec
 }
 
 // [[Rcpp::export]]
-Rcpp::List cvLogisticLasso(const arma::mat& X, arma::vec Y, const arma::vec& lambdaSeq, const arma::vec& folds, const double tau, const int kfolds, 
-                           const double h, const double phi0 = 0.01, const double gamma = 1.2, const double epsilon = 0.001, const int iteMax = 500) {
-  const int n = X.n_rows, p = X.n_cols, nlambda = lambdaSeq.size();
-  const double h1 = 1.0 / h;
-  arma::vec betaHat(p + 1);
-  arma::vec mse = arma::zeros(nlambda);
-  arma::rowvec mx = arma::mean(X, 0);
-  arma::vec sx1 = 1.0 / arma::stddev(X, 0, 0).t();
-  arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
-  double my = arma::mean(Y);
-  Y -= my;
-  for (int j = 1; j <= kfolds; j++) {
-    arma::uvec idx = arma::find(folds == j);
-    arma::uvec idxComp = arma::find(folds != j);
-    double n1Train = 1.0 / idxComp.size();
-    arma::mat trainZ = Z.rows(idxComp), testZ = Z.rows(idx);
-    arma::vec trainY = Y.rows(idxComp), testY = Y.rows(idx);
-    for (int i = 0; i < nlambda; i++) {
-      betaHat = logisticLasso(trainZ, trainY, lambdaSeq(i), tau, p, n1Train, h, h1, phi0, gamma, epsilon, iteMax);
-      mse(i) += lossQr(testZ, testY, betaHat, tau);
-    }
-  }
-  mse /= n;
-  arma::uword cvIdx = arma::index_min(mse);
-  betaHat = logisticLasso(Z, Y, lambdaSeq(cvIdx), tau, p, 1.0 / n, h, h1, phi0, gamma, epsilon, iteMax);
-  betaHat.rows(1, p) %= sx1;
-  betaHat(0) += my - arma::as_scalar(mx * betaHat.rows(1, p));
-  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("lambda") = lambdaSeq(cvIdx), Rcpp::Named("deviance") = mse);
-}
-
-// [[Rcpp::export]]
 Rcpp::List cvLogisticLassoWarm(const arma::mat& X, arma::vec Y, const arma::vec& lambdaSeq, const arma::vec& folds, const double tau, const int kfolds, 
                                const double h, const double phi0 = 0.01, const double gamma = 1.2, const double epsilon = 0.001, const int iteMax = 500) {
   const int n = X.n_rows, p = X.n_cols, nlambda = lambdaSeq.size();
   const double h1 = 1.0 / h;
   arma::vec betaHat(p + 1), betaWarm(p + 1);
-  arma::vec mse = arma::zeros(nlambda);
+  arma::vec dev = arma::zeros(nlambda);
+  arma::vec devsq = arma::zeros(nlambda);
   arma::rowvec mx = arma::mean(X, 0);
   arma::vec sx1 = 1.0 / arma::stddev(X, 0, 0).t();
   arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
@@ -752,51 +702,25 @@ Rcpp::List cvLogisticLassoWarm(const arma::mat& X, arma::vec Y, const arma::vec&
     arma::vec trainY = Y.rows(idxComp), testY = Y.rows(idx);
     betaHat = logisticLasso(trainZ, trainY, lambdaSeq(0), tau, p, n1Train, h, h1, phi0, gamma, epsilon, iteMax);
     betaWarm = betaHat;
-    mse(0) += lossQr(testZ, testY, betaHat, tau);
+    lossQr(testZ, testY, betaHat, tau, 0, dev, devsq);
     for (int i = 1; i < nlambda; i++) {
       betaHat = logisticLassoWarm(trainZ, trainY, lambdaSeq(i), betaWarm, tau, p, n1Train, h, h1, phi0, gamma, epsilon, iteMax);
-      mse(i) += lossQr(testZ, testY, betaHat, tau);
+      lossQr(testZ, testY, betaHat, tau, i, dev, devsq);
       betaWarm = betaHat;
     }
   }
-  mse /= n;
-  arma::uword cvIdx = arma::index_min(mse);
+  dev /= n;
+  devsq = arma::sqrt(devsq - n * arma::square(dev)) / n;
+  arma::uword cvIdx = arma::index_min(dev);
   betaHat = logisticLasso(Z, Y, lambdaSeq(cvIdx), tau, p, 1.0 / n, h, h1, phi0, gamma, epsilon, iteMax);
   betaHat.rows(1, p) %= sx1;
   betaHat(0) += my - arma::as_scalar(mx * betaHat.rows(1, p));
-  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("lambda") = lambdaSeq(cvIdx), Rcpp::Named("deviance") = mse);
-}
-
-// [[Rcpp::export]]
-Rcpp::List cvLogisticElastic(const arma::mat& X, arma::vec Y, const arma::vec& lambdaSeq, const arma::vec& folds, const double tau, const double alpha, 
-                             const int kfolds, const double h, const double phi0 = 0.01, const double gamma = 1.2, const double epsilon = 0.001, 
-                             const int iteMax = 500) {
-  const int n = X.n_rows, p = X.n_cols, nlambda = lambdaSeq.size();
-  const double h1 = 1.0 / h;
-  arma::vec betaHat(p + 1);
-  arma::vec mse = arma::zeros(nlambda);
-  arma::rowvec mx = arma::mean(X, 0);
-  arma::vec sx1 = 1.0 / arma::stddev(X, 0, 0).t();
-  arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
-  double my = arma::mean(Y);
-  Y -= my;
-  for (int j = 1; j <= kfolds; j++) {
-    arma::uvec idx = arma::find(folds == j);
-    arma::uvec idxComp = arma::find(folds != j);
-    double n1Train = 1.0 / idxComp.size();
-    arma::mat trainZ = Z.rows(idxComp), testZ = Z.rows(idx);
-    arma::vec trainY = Y.rows(idxComp), testY = Y.rows(idx);
-    for (int i = 0; i < nlambda; i++) {
-      betaHat = logisticElastic(trainZ, trainY, lambdaSeq(i), tau, alpha, p, n1Train, h, h1, phi0, gamma, epsilon, iteMax);
-      mse(i) += lossQr(testZ, testY, betaHat, tau);
-    }
-  }
-  mse /= n;
-  arma::uword cvIdx = arma::index_min(mse);
-  betaHat = logisticElastic(Z, Y, lambdaSeq(cvIdx), tau, alpha, p, 1.0 / n, h, h1, phi0, gamma, epsilon, iteMax);
-  betaHat.rows(1, p) %= sx1;
-  betaHat(0) += my - arma::as_scalar(mx * betaHat.rows(1, p));
-  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("lambda") = lambdaSeq(cvIdx), Rcpp::Named("deviance") = mse);
+  arma::uword seIdx = arma::max(arma::find(dev <= dev(cvIdx) + devsq(cvIdx)));
+  arma::vec betaHatSe = logisticLasso(Z, Y, lambdaSeq(seIdx), tau, p, 1.0 / n, h, h1, phi0, gamma, epsilon, iteMax);
+  betaHatSe.rows(1, p) %= sx1;
+  betaHatSe(0) += my - arma::as_scalar(mx * betaHatSe.rows(1, p));
+  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("coeffSe") = betaHatSe, Rcpp::Named("lambdaMin") = lambdaSeq(cvIdx), 
+                            Rcpp::Named("lambdaSe") = lambdaSeq(seIdx), Rcpp::Named("deviance") = dev, Rcpp::Named("devianceSd") = devsq);
 }
 
 // [[Rcpp::export]]
@@ -806,7 +730,8 @@ Rcpp::List cvLogisticElasticWarm(const arma::mat& X, arma::vec Y, const arma::ve
   const int n = X.n_rows, p = X.n_cols, nlambda = lambdaSeq.size();
   const double h1 = 1.0 / h;
   arma::vec betaHat(p + 1), betaWarm(p + 1);
-  arma::vec mse = arma::zeros(nlambda);
+  arma::vec dev = arma::zeros(nlambda);
+  arma::vec devsq = arma::zeros(nlambda);
   arma::rowvec mx = arma::mean(X, 0);
   arma::vec sx1 = 1.0 / arma::stddev(X, 0, 0).t();
   arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
@@ -820,76 +745,41 @@ Rcpp::List cvLogisticElasticWarm(const arma::mat& X, arma::vec Y, const arma::ve
     arma::vec trainY = Y.rows(idxComp), testY = Y.rows(idx);
     betaHat = logisticElastic(trainZ, trainY, lambdaSeq(0), tau, alpha, p, n1Train, h, h1, phi0, gamma, epsilon, iteMax);
     betaWarm = betaHat;
-    mse(0) += lossQr(testZ, testY, betaHat, tau);
+    lossQr(testZ, testY, betaHat, tau, 0, dev, devsq);
     for (int i = 1; i < nlambda; i++) {
       betaHat = logisticElasticWarm(trainZ, trainY, lambdaSeq(i), betaWarm, tau, alpha, p, n1Train, h, h1, phi0, gamma, epsilon, iteMax);
-      mse(i) += lossQr(testZ, testY, betaHat, tau);
+      lossQr(testZ, testY, betaHat, tau, i, dev, devsq);
       betaWarm = betaHat;
     }
   }
-  mse /= n;
-  arma::uword cvIdx = arma::index_min(mse);
+  dev /= n;
+  devsq = arma::sqrt(devsq - n * arma::square(dev)) / n;
+  arma::uword cvIdx = arma::index_min(dev);
   betaHat = logisticElastic(Z, Y, lambdaSeq(cvIdx), tau, alpha, p, 1.0 / n, h, h1, phi0, gamma, epsilon, iteMax);
   betaHat.rows(1, p) %= sx1;
   betaHat(0) += my - arma::as_scalar(mx * betaHat.rows(1, p));
-  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("lambda") = lambdaSeq(cvIdx), Rcpp::Named("deviance") = mse);
-}
-
-// [[Rcpp::export]]
-Rcpp::List cvLogisticGroupLasso(const arma::mat& X, arma::vec Y, const arma::vec& lambdaSeq, const arma::vec& folds, const double tau, const int kfolds, 
-                                const arma::vec& group, const int G, const double h, const double phi0 = 0.01, const double gamma = 1.2, 
-                                const double epsilon = 0.001, const int iteMax = 500) {
-  const int n = X.n_rows, p = X.n_cols, nlambda = lambdaSeq.size();
-  const double h1 = 1.0 / h;
-  arma::vec betaHat(p + 1);
-  arma::vec mse = arma::zeros(nlambda);
-  arma::rowvec mx = arma::mean(X, 0);
-  arma::vec sx1 = 1.0 / arma::stddev(X, 0, 0).t();
-  arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
-  double my = arma::mean(Y);
-  Y -= my;
-  arma::vec weight = arma::zeros(G);
-  for (int i = 1; i <= p; i++) {
-    weight(group(i)) += 1;
-  }
-  weight = arma::sqrt(weight);
-  for (int j = 1; j <= kfolds; j++) {
-    arma::uvec idx = arma::find(folds == j);
-    arma::uvec idxComp = arma::find(folds != j);
-    double n1Train = 1.0 / idxComp.size();
-    arma::mat trainZ = Z.rows(idxComp), testZ = Z.rows(idx);
-    arma::vec trainY = Y.rows(idxComp), testY = Y.rows(idx);
-    for (int i = 0; i < nlambda; i++) {
-      betaHat = logisticGroupLasso(trainZ, trainY, lambdaSeq(i), tau, group, weight, p, G, n1Train, h, h1, phi0, gamma, epsilon, iteMax);
-      mse(i) += lossQr(testZ, testY, betaHat, tau);
-    }
-  }
-  mse /= n;
-  arma::uword cvIdx = arma::index_min(mse);
-  betaHat = logisticGroupLasso(Z, Y, lambdaSeq(cvIdx), tau, group, weight, p, G, 1.0 / n, h, h1, phi0, gamma, epsilon, iteMax);
-  betaHat.rows(1, p) %= sx1;
-  betaHat(0) += my - arma::as_scalar(mx * betaHat.rows(1, p));
-  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("lambda") = lambdaSeq(cvIdx), Rcpp::Named("deviance") = mse);
+  arma::uword seIdx = arma::max(arma::find(dev <= dev(cvIdx) + devsq(cvIdx)));
+  arma::vec betaHatSe = logisticElastic(Z, Y, lambdaSeq(seIdx), tau, alpha, p, 1.0 / n, h, h1, phi0, gamma, epsilon, iteMax);
+  betaHatSe.rows(1, p) %= sx1;
+  betaHatSe(0) += my - arma::as_scalar(mx * betaHatSe.rows(1, p));
+  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("coeffSe") = betaHatSe, Rcpp::Named("lambdaMin") = lambdaSeq(cvIdx), 
+                            Rcpp::Named("lambdaSe") = lambdaSeq(seIdx), Rcpp::Named("deviance") = dev, Rcpp::Named("devianceSd") = devsq);
 }
 
 // [[Rcpp::export]]
 Rcpp::List cvLogisticGroupLassoWarm(const arma::mat& X, arma::vec Y, const arma::vec& lambdaSeq, const arma::vec& folds, const double tau, const int kfolds, 
-                                    const arma::vec& group, const int G, const double h, const double phi0 = 0.01, const double gamma = 1.2, 
+                                    const arma::vec& group, const arma::vec& weight, const int G, const double h, const double phi0 = 0.01, const double gamma = 1.2, 
                                     const double epsilon = 0.001, const int iteMax = 500) {
   const int n = X.n_rows, p = X.n_cols, nlambda = lambdaSeq.size();
   const double h1 = 1.0 / h;
   arma::vec betaHat(p + 1), betaWarm(p + 1);
-  arma::vec mse = arma::zeros(nlambda);
+  arma::vec dev = arma::zeros(nlambda);
+  arma::vec devsq = arma::zeros(nlambda);
   arma::rowvec mx = arma::mean(X, 0);
   arma::vec sx1 = 1.0 / arma::stddev(X, 0, 0).t();
   arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
   double my = arma::mean(Y);
   Y -= my;
-  arma::vec weight = arma::zeros(G);
-  for (int i = 1; i <= p; i++) {
-    weight(group(i)) += 1;
-  }
-  weight = arma::sqrt(weight);
   for (int j = 1; j <= kfolds; j++) {
     arma::uvec idx = arma::find(folds == j);
     arma::uvec idxComp = arma::find(folds != j);
@@ -898,76 +788,41 @@ Rcpp::List cvLogisticGroupLassoWarm(const arma::mat& X, arma::vec Y, const arma:
     arma::vec trainY = Y.rows(idxComp), testY = Y.rows(idx);
     betaHat = logisticGroupLasso(trainZ, trainY, lambdaSeq(0), tau, group, weight, p, G, n1Train, h, h1, phi0, gamma, epsilon, iteMax);
     betaWarm = betaHat;
-    mse(0) += lossQr(testZ, testY, betaHat, tau);
+    lossQr(testZ, testY, betaHat, tau, 0, dev, devsq);
     for (int i = 1; i < nlambda; i++) {
       betaHat = logisticGroupLassoWarm(trainZ, trainY, lambdaSeq(i), betaWarm, tau, group, weight, p, G, n1Train, h, h1, phi0, gamma, epsilon, iteMax);
-      mse(i) += lossQr(testZ, testY, betaHat, tau);
+      lossQr(testZ, testY, betaHat, tau, i, dev, devsq);
       betaWarm = betaHat;
     }
   }
-  mse /= n;
-  arma::uword cvIdx = arma::index_min(mse);
+  dev /= n;
+  devsq = arma::sqrt(devsq - n * arma::square(dev)) / n;
+  arma::uword cvIdx = arma::index_min(dev);
   betaHat = logisticGroupLasso(Z, Y, lambdaSeq(cvIdx), tau, group, weight, p, G, 1.0 / n, h, h1, phi0, gamma, epsilon, iteMax);
   betaHat.rows(1, p) %= sx1;
   betaHat(0) += my - arma::as_scalar(mx * betaHat.rows(1, p));
-  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("lambda") = lambdaSeq(cvIdx), Rcpp::Named("deviance") = mse);
-}
-
-// [[Rcpp::export]]
-Rcpp::List cvLogisticSparseGroupLasso(const arma::mat& X, arma::vec Y, const arma::vec& lambdaSeq, const arma::vec& folds, const double tau, 
-                                      const int kfolds, const arma::vec& group, const int G, const double h, const double phi0 = 0.01, 
-                                      const double gamma = 1.2, const double epsilon = 0.001, const int iteMax = 500) {
-  const int n = X.n_rows, p = X.n_cols, nlambda = lambdaSeq.size();
-  const double h1 = 1.0 / h;
-  arma::vec betaHat(p + 1);
-  arma::vec mse = arma::zeros(nlambda);
-  arma::rowvec mx = arma::mean(X, 0);
-  arma::vec sx1 = 1.0 / arma::stddev(X, 0, 0).t();
-  arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
-  double my = arma::mean(Y);
-  Y -= my;
-  arma::vec weight = arma::zeros(G);
-  for (int i = 1; i <= p; i++) {
-    weight(group(i)) += 1;
-  }
-  weight = arma::sqrt(weight);
-  for (int j = 1; j <= kfolds; j++) {
-    arma::uvec idx = arma::find(folds == j);
-    arma::uvec idxComp = arma::find(folds != j);
-    double n1Train = 1.0 / idxComp.size();
-    arma::mat trainZ = Z.rows(idxComp), testZ = Z.rows(idx);
-    arma::vec trainY = Y.rows(idxComp), testY = Y.rows(idx);
-    for (int i = 0; i < nlambda; i++) {
-      betaHat = logisticSparseGroupLasso(trainZ, trainY, lambdaSeq(i), tau, group, weight, p, G, n1Train, h, h1, phi0, gamma, epsilon, iteMax);
-      mse(i) += lossQr(testZ, testY, betaHat, tau);
-    }
-  }
-  mse /= n;
-  arma::uword cvIdx = arma::index_min(mse);
-  betaHat = logisticSparseGroupLasso(Z, Y, lambdaSeq(cvIdx), tau, group, weight, p, G, 1.0 / n, h, h1, phi0, gamma, epsilon, iteMax);
-  betaHat.rows(1, p) %= sx1;
-  betaHat(0) += my - arma::as_scalar(mx * betaHat.rows(1, p));
-  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("lambda") = lambdaSeq(cvIdx), Rcpp::Named("deviance") = mse);
+  arma::uword seIdx = arma::max(arma::find(dev <= dev(cvIdx) + devsq(cvIdx)));
+  arma::vec betaHatSe = logisticGroupLasso(Z, Y, lambdaSeq(seIdx), tau, group, weight, p, G, 1.0 / n, h, h1, phi0, gamma, epsilon, iteMax);
+  betaHatSe.rows(1, p) %= sx1;
+  betaHatSe(0) += my - arma::as_scalar(mx * betaHatSe.rows(1, p));
+  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("coeffSe") = betaHatSe, Rcpp::Named("lambdaMin") = lambdaSeq(cvIdx), 
+                            Rcpp::Named("lambdaSe") = lambdaSeq(seIdx), Rcpp::Named("deviance") = dev, Rcpp::Named("devianceSd") = devsq);
 }
 
 // [[Rcpp::export]]
 Rcpp::List cvLogisticSparseGroupLassoWarm(const arma::mat& X, arma::vec Y, const arma::vec& lambdaSeq, const arma::vec& folds, const double tau, 
-                                          const int kfolds, const arma::vec& group, const int G, const double h, const double phi0 = 0.01, 
+                                          const int kfolds, const arma::vec& group, const arma::vec& weight, const int G, const double h, const double phi0 = 0.01, 
                                           const double gamma = 1.2, const double epsilon = 0.001, const int iteMax = 500) {
   const int n = X.n_rows, p = X.n_cols, nlambda = lambdaSeq.size();
   const double h1 = 1.0 / h;
   arma::vec betaHat(p + 1), betaWarm(p + 1);
-  arma::vec mse = arma::zeros(nlambda);
+  arma::vec dev = arma::zeros(nlambda);
+  arma::vec devsq = arma::zeros(nlambda);
   arma::rowvec mx = arma::mean(X, 0);
   arma::vec sx1 = 1.0 / arma::stddev(X, 0, 0).t();
   arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
   double my = arma::mean(Y);
   Y -= my;
-  arma::vec weight = arma::zeros(G);
-  for (int i = 1; i <= p; i++) {
-    weight(group(i)) += 1;
-  }
-  weight = arma::sqrt(weight);
   for (int j = 1; j <= kfolds; j++) {
     arma::uvec idx = arma::find(folds == j);
     arma::uvec idxComp = arma::find(folds != j);
@@ -976,51 +831,25 @@ Rcpp::List cvLogisticSparseGroupLassoWarm(const arma::mat& X, arma::vec Y, const
     arma::vec trainY = Y.rows(idxComp), testY = Y.rows(idx);
     betaHat = logisticSparseGroupLasso(trainZ, trainY, lambdaSeq(0), tau, group, weight, p, G, n1Train, h, h1, phi0, gamma, epsilon, iteMax);
     betaWarm = betaHat;
-    mse(0) += lossQr(testZ, testY, betaHat, tau);
+    lossQr(testZ, testY, betaHat, tau, 0, dev, devsq);
     for (int i = 1; i < nlambda; i++) {
       betaHat = logisticSparseGroupLassoWarm(trainZ, trainY, lambdaSeq(i), betaWarm, tau, group, weight, p, G, n1Train, h, h1, phi0, gamma, epsilon, iteMax);
-      mse(i) += lossQr(testZ, testY, betaHat, tau);
+      lossQr(testZ, testY, betaHat, tau, i, dev, devsq);
       betaWarm = betaHat;
     }
   }
-  mse /= n;
-  arma::uword cvIdx = arma::index_min(mse);
+  dev /= n;
+  devsq = arma::sqrt(devsq - n * arma::square(dev)) / n;
+  arma::uword cvIdx = arma::index_min(dev);
   betaHat = logisticSparseGroupLasso(Z, Y, lambdaSeq(cvIdx), tau, group, weight, p, G, 1.0 / n, h, h1, phi0, gamma, epsilon, iteMax);
   betaHat.rows(1, p) %= sx1;
   betaHat(0) += my - arma::as_scalar(mx * betaHat.rows(1, p));
-  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("lambda") = lambdaSeq(cvIdx), Rcpp::Named("deviance") = mse);
-}
-
-// [[Rcpp::export]]
-Rcpp::List cvLogisticScad(const arma::mat& X, arma::vec Y, const arma::vec& lambdaSeq, const arma::vec& folds, const double tau, const int kfolds, 
-                          const double h, const double phi0 = 0.01, const double gamma = 1.2, const double epsilon = 0.001, const int iteMax = 500,
-                          const int iteTight = 3, const double para = 3.7) {
-  const int n = X.n_rows, p = X.n_cols, nlambda = lambdaSeq.size();
-  const double h1 = 1.0 / h;
-  arma::vec betaHat(p + 1);
-  arma::vec mse = arma::zeros(nlambda);
-  arma::rowvec mx = arma::mean(X, 0);
-  arma::vec sx1 = 1.0 / arma::stddev(X, 0, 0).t();
-  arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
-  double my = arma::mean(Y);
-  Y -= my;
-  for (int j = 1; j <= kfolds; j++) {
-    arma::uvec idx = arma::find(folds == j);
-    arma::uvec idxComp = arma::find(folds != j);
-    double n1Train = 1.0 / idxComp.size();
-    arma::mat trainZ = Z.rows(idxComp), testZ = Z.rows(idx);
-    arma::vec trainY = Y.rows(idxComp), testY = Y.rows(idx);
-    for (int i = 0; i < nlambda; i++) {
-      betaHat = logisticScad(trainZ, trainY, lambdaSeq(i), tau, p, n1Train, h, h1, phi0, gamma, epsilon, iteMax, iteTight, para);
-      mse(i) += lossQr(testZ, testY, betaHat, tau);
-    }
-  }
-  mse /= n;
-  arma::uword cvIdx = arma::index_min(mse);
-  betaHat = logisticScad(Z, Y, lambdaSeq(cvIdx), tau, p, 1.0 / n, h, h1, phi0, gamma, epsilon, iteMax, iteTight, para);
-  betaHat.rows(1, p) %= sx1;
-  betaHat(0) += my - arma::as_scalar(mx * betaHat.rows(1, p));
-  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("lambda") = lambdaSeq(cvIdx), Rcpp::Named("deviance") = mse);
+  arma::uword seIdx = arma::max(arma::find(dev <= dev(cvIdx) + devsq(cvIdx)));
+  arma::vec betaHatSe = logisticSparseGroupLasso(Z, Y, lambdaSeq(seIdx), tau, group, weight, p, G, 1.0 / n, h, h1, phi0, gamma, epsilon, iteMax);
+  betaHatSe.rows(1, p) %= sx1;
+  betaHatSe(0) += my - arma::as_scalar(mx * betaHatSe.rows(1, p));
+  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("coeffSe") = betaHatSe, Rcpp::Named("lambdaMin") = lambdaSeq(cvIdx), 
+                            Rcpp::Named("lambdaSe") = lambdaSeq(seIdx), Rcpp::Named("deviance") = dev, Rcpp::Named("devianceSd") = devsq);
 }
 
 // [[Rcpp::export]]
@@ -1030,7 +859,8 @@ Rcpp::List cvLogisticScadWarm(const arma::mat& X, arma::vec Y, const arma::vec& 
   const int n = X.n_rows, p = X.n_cols, nlambda = lambdaSeq.size();
   const double h1 = 1.0 / h;
   arma::vec betaHat(p + 1), betaWarm(p + 1);
-  arma::vec mse = arma::zeros(nlambda);
+  arma::vec dev = arma::zeros(nlambda);
+  arma::vec devsq = arma::zeros(nlambda);
   arma::rowvec mx = arma::mean(X, 0);
   arma::vec sx1 = 1.0 / arma::stddev(X, 0, 0).t();
   arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
@@ -1044,51 +874,25 @@ Rcpp::List cvLogisticScadWarm(const arma::mat& X, arma::vec Y, const arma::vec& 
     arma::vec trainY = Y.rows(idxComp), testY = Y.rows(idx);
     betaHat = logisticScad(trainZ, trainY, lambdaSeq(0), tau, p, n1Train, h, h1, phi0, gamma, epsilon, iteMax, iteTight, para);
     betaWarm = betaHat;
-    mse(0) += lossQr(testZ, testY, betaHat, tau);
+    lossQr(testZ, testY, betaHat, tau, 0, dev, devsq);
     for (int i = 1; i < nlambda; i++) {
       betaHat = logisticScadWarm(trainZ, trainY, lambdaSeq(i), betaWarm, tau, p, n1Train, h, h1, phi0, gamma, epsilon, iteMax, para);
-      mse(i) += lossQr(testZ, testY, betaHat, tau);
+      lossQr(testZ, testY, betaHat, tau, i, dev, devsq);
       betaWarm = betaHat;
     }
   }
-  mse /= n;
-  arma::uword cvIdx = arma::index_min(mse);
+  dev /= n;
+  devsq = arma::sqrt(devsq - n * arma::square(dev)) / n;
+  arma::uword cvIdx = arma::index_min(dev);
   betaHat = logisticScad(Z, Y, lambdaSeq(cvIdx), tau, p, 1.0 / n, h, h1, phi0, gamma, epsilon, iteMax, iteTight, para);
   betaHat.rows(1, p) %= sx1;
   betaHat(0) += my - arma::as_scalar(mx * betaHat.rows(1, p));
-  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("lambda") = lambdaSeq(cvIdx), Rcpp::Named("deviance") = mse);
-}
-
-// [[Rcpp::export]]
-Rcpp::List cvLogisticMcp(const arma::mat& X, arma::vec Y, const arma::vec& lambdaSeq, const arma::vec& folds, const double tau, const int kfolds, 
-                         const double h, const double phi0 = 0.01, const double gamma = 1.5, const double epsilon = 0.001, const int iteMax = 500,
-                         const int iteTight = 3, const double para = 3) {
-  const int n = X.n_rows, p = X.n_cols, nlambda = lambdaSeq.size();
-  const double h1 = 1.0 / h;
-  arma::vec betaHat(p + 1);
-  arma::vec mse = arma::zeros(nlambda);
-  arma::rowvec mx = arma::mean(X, 0);
-  arma::vec sx1 = 1.0 / arma::stddev(X, 0, 0).t();
-  arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
-  double my = arma::mean(Y);
-  Y -= my;
-  for (int j = 1; j <= kfolds; j++) {
-    arma::uvec idx = arma::find(folds == j);
-    arma::uvec idxComp = arma::find(folds != j);
-    double n1Train = 1.0 / idxComp.size();
-    arma::mat trainZ = Z.rows(idxComp), testZ = Z.rows(idx);
-    arma::vec trainY = Y.rows(idxComp), testY = Y.rows(idx);
-    for (int i = 0; i < nlambda; i++) {
-      betaHat = logisticMcp(trainZ, trainY, lambdaSeq(i), tau, p, n1Train, h, h1, phi0, gamma, epsilon, iteMax, iteTight, para);
-      mse(i) += lossQr(testZ, testY, betaHat, tau);
-    }
-  }
-  mse /= n;
-  arma::uword cvIdx = arma::index_min(mse);
-  betaHat = logisticMcp(Z, Y, lambdaSeq(cvIdx), tau, p, 1.0 / n, h, h1, phi0, gamma, epsilon, iteMax, iteTight, para);
-  betaHat.rows(1, p) %= sx1;
-  betaHat(0) += my - arma::as_scalar(mx * betaHat.rows(1, p));
-  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("lambda") = lambdaSeq(cvIdx), Rcpp::Named("deviance") = mse);
+  arma::uword seIdx = arma::max(arma::find(dev <= dev(cvIdx) + devsq(cvIdx)));
+  arma::vec betaHatSe = logisticScad(Z, Y, lambdaSeq(seIdx), tau, p, 1.0 / n, h, h1, phi0, gamma, epsilon, iteMax, iteTight, para);
+  betaHatSe.rows(1, p) %= sx1;
+  betaHatSe(0) += my - arma::as_scalar(mx * betaHatSe.rows(1, p));
+  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("coeffSe") = betaHatSe, Rcpp::Named("lambdaMin") = lambdaSeq(cvIdx), 
+                            Rcpp::Named("lambdaSe") = lambdaSeq(seIdx), Rcpp::Named("deviance") = dev, Rcpp::Named("devianceSd") = devsq);
 }
 
 // [[Rcpp::export]]
@@ -1098,7 +902,8 @@ Rcpp::List cvLogisticMcpWarm(const arma::mat& X, arma::vec Y, const arma::vec& l
   const int n = X.n_rows, p = X.n_cols, nlambda = lambdaSeq.size();
   const double h1 = 1.0 / h;
   arma::vec betaHat(p + 1), betaWarm(p + 1);
-  arma::vec mse = arma::zeros(nlambda);
+  arma::vec dev = arma::zeros(nlambda);
+  arma::vec devsq = arma::zeros(nlambda);
   arma::rowvec mx = arma::mean(X, 0);
   arma::vec sx1 = 1.0 / arma::stddev(X, 0, 0).t();
   arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
@@ -1112,18 +917,24 @@ Rcpp::List cvLogisticMcpWarm(const arma::mat& X, arma::vec Y, const arma::vec& l
     arma::vec trainY = Y.rows(idxComp), testY = Y.rows(idx);
     betaHat = logisticMcp(trainZ, trainY, lambdaSeq(0), tau, p, n1Train, h, h1, phi0, gamma, epsilon, iteMax, iteTight, para);
     betaWarm = betaHat;
-    mse(0) += lossQr(testZ, testY, betaHat, tau);
+    lossQr(testZ, testY, betaHat, tau, 0, dev, devsq);
     for (int i = 1; i < nlambda; i++) {
       betaHat = logisticMcpWarm(trainZ, trainY, lambdaSeq(i), betaWarm, tau, p, n1Train, h, h1, phi0, gamma, epsilon, iteMax, para);
-      mse(i) += lossQr(testZ, testY, betaHat, tau);
+      lossQr(testZ, testY, betaHat, tau, i, dev, devsq);
       betaWarm = betaHat;
     }
   }
-  mse /= n;
-  arma::uword cvIdx = arma::index_min(mse);
+  dev /= n;
+  devsq = arma::sqrt(devsq - n * arma::square(dev)) / n;
+  arma::uword cvIdx = arma::index_min(dev);
   betaHat = logisticMcp(Z, Y, lambdaSeq(cvIdx), tau, p, 1.0 / n, h, h1, phi0, gamma, epsilon, iteMax, iteTight, para);
   betaHat.rows(1, p) %= sx1;
   betaHat(0) += my - arma::as_scalar(mx * betaHat.rows(1, p));
-  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("lambda") = lambdaSeq(cvIdx), Rcpp::Named("deviance") = mse);
+  arma::uword seIdx = arma::max(arma::find(dev <= dev(cvIdx) + devsq(cvIdx)));
+  arma::vec betaHatSe = logisticMcp(Z, Y, lambdaSeq(seIdx), tau, p, 1.0 / n, h, h1, phi0, gamma, epsilon, iteMax, iteTight, para);
+  betaHatSe.rows(1, p) %= sx1;
+  betaHatSe(0) += my - arma::as_scalar(mx * betaHatSe.rows(1, p));
+  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("coeffSe") = betaHatSe, Rcpp::Named("lambdaMin") = lambdaSeq(cvIdx), 
+                            Rcpp::Named("lambdaSe") = lambdaSeq(seIdx), Rcpp::Named("deviance") = dev, Rcpp::Named("devianceSd") = devsq);
 }
 

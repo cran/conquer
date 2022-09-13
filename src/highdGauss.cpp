@@ -525,7 +525,7 @@ arma::mat conquerGaussElasticSeq(const arma::mat& X, arma::vec Y, const arma::ve
 }
 
 // [[Rcpp::export]]
-arma::vec conquerGaussGroupLasso(const arma::mat& X, arma::vec Y, const double lambda, const double tau, const arma::vec& group, const int G, 
+arma::vec conquerGaussGroupLasso(const arma::mat& X, arma::vec Y, const double lambda, const double tau, const arma::vec& group, const arma::vec& weight, const int G, 
                                  const double h, const double phi0 = 0.01, const double gamma = 1.2, const double epsilon = 0.001, const int iteMax = 500) {
   const int n = X.n_rows, p = X.n_cols;
   const double h1 = 1.0 / h, h2 = 1.0 / (h * h);
@@ -534,11 +534,6 @@ arma::vec conquerGaussGroupLasso(const arma::mat& X, arma::vec Y, const double l
   arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
   double my = arma::mean(Y);
   Y -= my;
-  arma::vec weight = arma::zeros(G);
-  for (int i = 1; i <= p; i++) {
-    weight(group(i)) += 1;
-  }
-  weight = arma::sqrt(weight);
   arma::vec betaHat = gaussGroupLasso(Z, Y, lambda, tau, group, weight, p, G, 1.0 / n, h, h1, h2, phi0, gamma, epsilon, iteMax);
   betaHat.rows(1, p) %= sx1;
   betaHat(0) += my - arma::as_scalar(mx * betaHat.rows(1, p));
@@ -546,7 +541,7 @@ arma::vec conquerGaussGroupLasso(const arma::mat& X, arma::vec Y, const double l
 }
 
 // [[Rcpp::export]]
-arma::mat conquerGaussGroupLassoSeq(const arma::mat& X, arma::vec Y, const arma::vec& lambdaSeq, const double tau, const arma::vec& group, const int G, 
+arma::mat conquerGaussGroupLassoSeq(const arma::mat& X, arma::vec Y, const arma::vec& lambdaSeq, const double tau, const arma::vec& group, const arma::vec& weight, const int G, 
                                     const double h, const double phi0 = 0.01, const double gamma = 1.2, const double epsilon = 0.001, const int iteMax = 500) {
   const int n = X.n_rows, p = X.n_cols, nlambda = lambdaSeq.size();
   const double h1 = 1.0 / h, h2 = 1.0 / (h * h), n1 = 1.0 / n;
@@ -555,11 +550,6 @@ arma::mat conquerGaussGroupLassoSeq(const arma::mat& X, arma::vec Y, const arma:
   arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
   double my = arma::mean(Y);
   Y -= my;
-  arma::vec weight = arma::zeros(G);
-  for (int i = 1; i <= p; i++) {
-    weight(group(i)) += 1;
-  }
-  weight = arma::sqrt(weight);
   arma::mat betaSeq(p + 1, nlambda);
   arma::vec betaHat = gaussGroupLasso(Z, Y, lambdaSeq(0), tau, group, weight, p, G, n1, h, h1, h2, phi0, gamma, epsilon, iteMax);
   arma::vec betaWarm = betaHat;
@@ -573,7 +563,7 @@ arma::mat conquerGaussGroupLassoSeq(const arma::mat& X, arma::vec Y, const arma:
 }
 
 // [[Rcpp::export]]
-arma::vec conquerGaussSparseGroupLasso(const arma::mat& X, arma::vec Y, const double lambda, const double tau, const arma::vec& group, const int G, 
+arma::vec conquerGaussSparseGroupLasso(const arma::mat& X, arma::vec Y, const double lambda, const double tau, const arma::vec& group, const arma::vec& weight, const int G, 
                                        const double h, const double phi0 = 0.01, const double gamma = 1.2, const double epsilon = 0.001, 
                                        const int iteMax = 500) {
   const int n = X.n_rows, p = X.n_cols;
@@ -583,11 +573,6 @@ arma::vec conquerGaussSparseGroupLasso(const arma::mat& X, arma::vec Y, const do
   arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
   double my = arma::mean(Y);
   Y -= my;
-  arma::vec weight = arma::zeros(G);
-  for (int i = 1; i <= p; i++) {
-    weight(group(i)) += 1;
-  }
-  weight = arma::sqrt(weight);
   arma::vec betaHat = gaussSparseGroupLasso(Z, Y, lambda, tau, group, weight, p, G, 1.0 / n, h, h1, h2, phi0, gamma, epsilon, iteMax);
   betaHat.rows(1, p) %= sx1;
   betaHat(0) += my - arma::as_scalar(mx * betaHat.rows(1, p));
@@ -595,7 +580,7 @@ arma::vec conquerGaussSparseGroupLasso(const arma::mat& X, arma::vec Y, const do
 }
 
 // [[Rcpp::export]]
-arma::mat conquerGaussSparseGroupLassoSeq(const arma::mat& X, arma::vec Y, const arma::vec& lambdaSeq, const double tau, const arma::vec& group, 
+arma::mat conquerGaussSparseGroupLassoSeq(const arma::mat& X, arma::vec Y, const arma::vec& lambdaSeq, const double tau, const arma::vec& group, const arma::vec& weight, 
                                           const int G, const double h, const double phi0 = 0.01, const double gamma = 1.2, const double epsilon = 0.001, 
                                           const int iteMax = 500) {
   const int n = X.n_rows, p = X.n_cols, nlambda = lambdaSeq.size();
@@ -605,11 +590,6 @@ arma::mat conquerGaussSparseGroupLassoSeq(const arma::mat& X, arma::vec Y, const
   arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
   double my = arma::mean(Y);
   Y -= my;
-  arma::vec weight = arma::zeros(G);
-  for (int i = 1; i <= p; i++) {
-    weight(group(i)) += 1;
-  }
-  weight = arma::sqrt(weight);
   arma::mat betaSeq(p + 1, nlambda);
   arma::vec betaHat = gaussSparseGroupLasso(Z, Y, lambdaSeq(0), tau, group, weight, p, G, n1, h, h1, h2, phi0, gamma, epsilon, iteMax);
   arma::vec betaWarm = betaHat;
@@ -706,43 +686,13 @@ arma::mat conquerGaussMcpSeq(const arma::mat& X, arma::vec Y, const arma::vec& l
 
 // cross-validation, the range of lambda is guided by the simulation-based mathod in Belloni & Chernozhukov (2011), AOS
 // [[Rcpp::export]]
-Rcpp::List cvGaussLasso(const arma::mat& X, arma::vec Y, const arma::vec& lambdaSeq, const arma::vec& folds, const double tau, const int kfolds, 
-                        const double h, const double phi0 = 0.01, const double gamma = 1.2, const double epsilon = 0.001, const int iteMax = 500) {
-  const int n = X.n_rows, p = X.n_cols, nlambda = lambdaSeq.size();
-  const double h1 = 1.0 / h, h2 = 1.0 / (h * h);
-  arma::vec betaHat(p + 1);
-  arma::vec mse = arma::zeros(nlambda);
-  arma::rowvec mx = arma::mean(X, 0);
-  arma::vec sx1 = 1.0 / arma::stddev(X, 0, 0).t();
-  arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
-  double my = arma::mean(Y);
-  Y -= my;
-  for (int j = 1; j <= kfolds; j++) {
-    arma::uvec idx = arma::find(folds == j);
-    arma::uvec idxComp = arma::find(folds != j);
-    double n1Train = 1.0 / idxComp.size();
-    arma::mat trainZ = Z.rows(idxComp), testZ = Z.rows(idx);
-    arma::vec trainY = Y.rows(idxComp), testY = Y.rows(idx);
-    for (int i = 0; i < nlambda; i++) {
-      betaHat = gaussLasso(trainZ, trainY, lambdaSeq(i), tau, p, n1Train, h, h1, h2, phi0, gamma, epsilon, iteMax);
-      mse(i) += lossQr(testZ, testY, betaHat, tau);
-    }
-  }
-  mse /= n;
-  arma::uword cvIdx = arma::index_min(mse);
-  betaHat = gaussLasso(Z, Y, lambdaSeq(cvIdx), tau, p, 1.0 / n, h, h1, h2, phi0, gamma, epsilon, iteMax);
-  betaHat.rows(1, p) %= sx1;
-  betaHat(0) += my - arma::as_scalar(mx * betaHat.rows(1, p));
-  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("lambda") = lambdaSeq(cvIdx), Rcpp::Named("deviance") = mse);
-}
-
-// [[Rcpp::export]]
 Rcpp::List cvGaussLassoWarm(const arma::mat& X, arma::vec Y, const arma::vec& lambdaSeq, const arma::vec& folds, const double tau, const int kfolds, 
                             const double h, const double phi0 = 0.01, const double gamma = 1.2, const double epsilon = 0.001, const int iteMax = 500) {
   const int n = X.n_rows, p = X.n_cols, nlambda = lambdaSeq.size();
   const double h1 = 1.0 / h, h2 = 1.0 / (h * h);
   arma::vec betaHat(p + 1), betaWarm(p + 1);
-  arma::vec mse = arma::zeros(nlambda);
+  arma::vec dev = arma::zeros(nlambda);
+  arma::vec devsq = arma::zeros(nlambda);
   arma::rowvec mx = arma::mean(X, 0);
   arma::vec sx1 = 1.0 / arma::stddev(X, 0, 0).t();
   arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
@@ -756,51 +706,25 @@ Rcpp::List cvGaussLassoWarm(const arma::mat& X, arma::vec Y, const arma::vec& la
     arma::vec trainY = Y.rows(idxComp), testY = Y.rows(idx);
     betaHat = gaussLasso(trainZ, trainY, lambdaSeq(0), tau, p, n1Train, h, h1, h2, phi0, gamma, epsilon, iteMax);
     betaWarm = betaHat;
-    mse(0) += lossQr(testZ, testY, betaHat, tau);
+    lossQr(testZ, testY, betaHat, tau, 0, dev, devsq);
     for (int i = 1; i < nlambda; i++) {
       betaHat = gaussLassoWarm(trainZ, trainY, lambdaSeq(i), betaWarm, tau, p, n1Train, h, h1, h2, phi0, gamma, epsilon, iteMax);
-      mse(i) += lossQr(testZ, testY, betaHat, tau);
+      lossQr(testZ, testY, betaHat, tau, i, dev, devsq);
       betaWarm = betaHat;
     }
   }
-  mse /= n;
-  arma::uword cvIdx = arma::index_min(mse);
+  dev /= n;
+  devsq = arma::sqrt(devsq - n * arma::square(dev)) / n;
+  arma::uword cvIdx = arma::index_min(dev);
   betaHat = gaussLasso(Z, Y, lambdaSeq(cvIdx), tau, p, 1.0 / n, h, h1, h2, phi0, gamma, epsilon, iteMax);
   betaHat.rows(1, p) %= sx1;
   betaHat(0) += my - arma::as_scalar(mx * betaHat.rows(1, p));
-  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("lambda") = lambdaSeq(cvIdx), Rcpp::Named("deviance") = mse);
-}
-
-// [[Rcpp::export]]
-Rcpp::List cvGaussElastic(const arma::mat& X, arma::vec Y, const arma::vec& lambdaSeq, const arma::vec& folds, const double tau, const double alpha, 
-                          const int kfolds, const double h, const double phi0 = 0.01, const double gamma = 1.2, const double epsilon = 0.001, 
-                          const int iteMax = 500) {
-  const int n = X.n_rows, p = X.n_cols, nlambda = lambdaSeq.size();
-  const double h1 = 1.0 / h, h2 = 1.0 / (h * h);
-  arma::vec betaHat(p + 1);
-  arma::vec mse = arma::zeros(nlambda);
-  arma::rowvec mx = arma::mean(X, 0);
-  arma::vec sx1 = 1.0 / arma::stddev(X, 0, 0).t();
-  arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
-  double my = arma::mean(Y);
-  Y -= my;
-  for (int j = 1; j <= kfolds; j++) {
-    arma::uvec idx = arma::find(folds == j);
-    arma::uvec idxComp = arma::find(folds != j);
-    double n1Train = 1.0 / idxComp.size();
-    arma::mat trainZ = Z.rows(idxComp), testZ = Z.rows(idx);
-    arma::vec trainY = Y.rows(idxComp), testY = Y.rows(idx);
-    for (int i = 0; i < nlambda; i++) {
-      betaHat = gaussElastic(trainZ, trainY, lambdaSeq(i), tau, alpha, p, n1Train, h, h1, h2, phi0, gamma, epsilon, iteMax);
-      mse(i) += lossQr(testZ, testY, betaHat, tau);
-    }
-  }
-  mse /= n;
-  arma::uword cvIdx = arma::index_min(mse);
-  betaHat = gaussElastic(Z, Y, lambdaSeq(cvIdx), tau, alpha, p, 1.0 / n, h, h1, h2, phi0, gamma, epsilon, iteMax);
-  betaHat.rows(1, p) %= sx1;
-  betaHat(0) += my - arma::as_scalar(mx * betaHat.rows(1, p));
-  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("lambda") = lambdaSeq(cvIdx), Rcpp::Named("deviance") = mse);
+  arma::uword seIdx = arma::max(arma::find(dev <= dev(cvIdx) + devsq(cvIdx)));
+  arma::vec betaHatSe = gaussLasso(Z, Y, lambdaSeq(seIdx), tau, p, 1.0 / n, h, h1, h2, phi0, gamma, epsilon, iteMax);
+  betaHatSe.rows(1, p) %= sx1;
+  betaHatSe(0) += my - arma::as_scalar(mx * betaHatSe.rows(1, p));
+  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("coeffSe") = betaHatSe, Rcpp::Named("lambdaMin") = lambdaSeq(cvIdx), 
+                            Rcpp::Named("lambdaSe") = lambdaSeq(seIdx), Rcpp::Named("deviance") = dev, Rcpp::Named("devianceSd") = devsq);
 }
 
 // [[Rcpp::export]]
@@ -810,7 +734,8 @@ Rcpp::List cvGaussElasticWarm(const arma::mat& X, arma::vec Y, const arma::vec& 
   const int n = X.n_rows, p = X.n_cols, nlambda = lambdaSeq.size();
   const double h1 = 1.0 / h, h2 = 1.0 / (h * h);
   arma::vec betaHat(p + 1), betaWarm(p + 1);
-  arma::vec mse = arma::zeros(nlambda);
+  arma::vec dev = arma::zeros(nlambda);
+  arma::vec devsq = arma::zeros(nlambda);
   arma::rowvec mx = arma::mean(X, 0);
   arma::vec sx1 = 1.0 / arma::stddev(X, 0, 0).t();
   arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
@@ -824,76 +749,41 @@ Rcpp::List cvGaussElasticWarm(const arma::mat& X, arma::vec Y, const arma::vec& 
     arma::vec trainY = Y.rows(idxComp), testY = Y.rows(idx);
     betaHat = gaussElastic(trainZ, trainY, lambdaSeq(0), tau, alpha, p, n1Train, h, h1, h2, phi0, gamma, epsilon, iteMax);
     betaWarm = betaHat;
-    mse(0) += lossQr(testZ, testY, betaHat, tau);
+    lossQr(testZ, testY, betaHat, tau, 0, dev, devsq);
     for (int i = 1; i < nlambda; i++) {
       betaHat = gaussElasticWarm(trainZ, trainY, lambdaSeq(i), betaWarm, tau, alpha, p, n1Train, h, h1, h2, phi0, gamma, epsilon, iteMax);
-      mse(i) += lossQr(testZ, testY, betaHat, tau);
+      lossQr(testZ, testY, betaHat, tau, i, dev, devsq);
       betaWarm = betaHat;
     }
   }
-  mse /= n;
-  arma::uword cvIdx = arma::index_min(mse);
+  dev /= n;
+  devsq = arma::sqrt(devsq - n * arma::square(dev)) / n;
+  arma::uword cvIdx = arma::index_min(dev);
   betaHat = gaussElastic(Z, Y, lambdaSeq(cvIdx), tau, alpha, p, 1.0 / n, h, h1, h2, phi0, gamma, epsilon, iteMax);
   betaHat.rows(1, p) %= sx1;
   betaHat(0) += my - arma::as_scalar(mx * betaHat.rows(1, p));
-  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("lambda") = lambdaSeq(cvIdx), Rcpp::Named("deviance") = mse);
-}
-
-// [[Rcpp::export]]
-Rcpp::List cvGaussGroupLasso(const arma::mat& X, arma::vec Y, const arma::vec& lambdaSeq, const arma::vec& folds, const double tau, const int kfolds, 
-                             const arma::vec& group, const int G, const double h, const double phi0 = 0.01, const double gamma = 1.2, 
-                             const double epsilon = 0.001, const int iteMax = 500) {
-  const int n = X.n_rows, p = X.n_cols, nlambda = lambdaSeq.size();
-  const double h1 = 1.0 / h, h2 = 1.0 / (h * h);
-  arma::vec betaHat(p + 1);
-  arma::vec mse = arma::zeros(nlambda);
-  arma::rowvec mx = arma::mean(X, 0);
-  arma::vec sx1 = 1.0 / arma::stddev(X, 0, 0).t();
-  arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
-  double my = arma::mean(Y);
-  Y -= my;
-  arma::vec weight = arma::zeros(G);
-  for (int i = 1; i <= p; i++) {
-    weight(group(i)) += 1;
-  }
-  weight = arma::sqrt(weight);
-  for (int j = 1; j <= kfolds; j++) {
-    arma::uvec idx = arma::find(folds == j);
-    arma::uvec idxComp = arma::find(folds != j);
-    double n1Train = 1.0 / idxComp.size();
-    arma::mat trainZ = Z.rows(idxComp), testZ = Z.rows(idx);
-    arma::vec trainY = Y.rows(idxComp), testY = Y.rows(idx);
-    for (int i = 0; i < nlambda; i++) {
-      betaHat = gaussGroupLasso(trainZ, trainY, lambdaSeq(i), tau, group, weight, p, G, n1Train, h, h1, h2, phi0, gamma, epsilon, iteMax);
-      mse(i) += lossQr(testZ, testY, betaHat, tau);
-    }
-  }
-  mse /= n;
-  arma::uword cvIdx = arma::index_min(mse);
-  betaHat = gaussGroupLasso(Z, Y, lambdaSeq(cvIdx), tau, group, weight, p, G, 1.0 / n, h, h1, h2, phi0, gamma, epsilon, iteMax);
-  betaHat.rows(1, p) %= sx1;
-  betaHat(0) += my - arma::as_scalar(mx * betaHat.rows(1, p));
-  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("lambda") = lambdaSeq(cvIdx), Rcpp::Named("deviance") = mse);
+  arma::uword seIdx = arma::max(arma::find(dev <= dev(cvIdx) + devsq(cvIdx)));
+  arma::vec betaHatSe = gaussElastic(Z, Y, lambdaSeq(seIdx), tau, alpha, p, 1.0 / n, h, h1, h2, phi0, gamma, epsilon, iteMax);
+  betaHatSe.rows(1, p) %= sx1;
+  betaHatSe(0) += my - arma::as_scalar(mx * betaHatSe.rows(1, p));
+  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("coeffSe") = betaHatSe, Rcpp::Named("lambdaMin") = lambdaSeq(cvIdx), 
+                            Rcpp::Named("lambdaSe") = lambdaSeq(seIdx), Rcpp::Named("deviance") = dev, Rcpp::Named("devianceSd") = devsq);
 }
 
 // [[Rcpp::export]]
 Rcpp::List cvGaussGroupLassoWarm(const arma::mat& X, arma::vec Y, const arma::vec& lambdaSeq, const arma::vec& folds, const double tau, const int kfolds, 
-                                 const arma::vec& group, const int G, const double h, const double phi0 = 0.01, const double gamma = 1.2, 
+                                 const arma::vec& group, const arma::vec& weight, const int G, const double h, const double phi0 = 0.01, const double gamma = 1.2, 
                                  const double epsilon = 0.001, const int iteMax = 500) {
   const int n = X.n_rows, p = X.n_cols, nlambda = lambdaSeq.size();
   const double h1 = 1.0 / h, h2 = 1.0 / (h * h);
   arma::vec betaHat(p + 1), betaWarm(p + 1);
-  arma::vec mse = arma::zeros(nlambda);
+  arma::vec dev = arma::zeros(nlambda);
+  arma::vec devsq = arma::zeros(nlambda);
   arma::rowvec mx = arma::mean(X, 0);
   arma::vec sx1 = 1.0 / arma::stddev(X, 0, 0).t();
   arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
   double my = arma::mean(Y);
   Y -= my;
-  arma::vec weight = arma::zeros(G);
-  for (int i = 1; i <= p; i++) {
-    weight(group(i)) += 1;
-  }
-  weight = arma::sqrt(weight);
   for (int j = 1; j <= kfolds; j++) {
     arma::uvec idx = arma::find(folds == j);
     arma::uvec idxComp = arma::find(folds != j);
@@ -902,76 +792,41 @@ Rcpp::List cvGaussGroupLassoWarm(const arma::mat& X, arma::vec Y, const arma::ve
     arma::vec trainY = Y.rows(idxComp), testY = Y.rows(idx);
     betaHat = gaussGroupLasso(trainZ, trainY, lambdaSeq(0), tau, group, weight, p, G, n1Train, h, h1, h2, phi0, gamma, epsilon, iteMax);
     betaWarm = betaHat;
-    mse(0) += lossQr(testZ, testY, betaHat, tau);
+    lossQr(testZ, testY, betaHat, tau, 0, dev, devsq);
     for (int i = 1; i < nlambda; i++) {
       betaHat = gaussGroupLassoWarm(trainZ, trainY, lambdaSeq(i), betaWarm, tau, group, weight, p, G, n1Train, h, h1, h2, phi0, gamma, epsilon, iteMax);
-      mse(i) += lossQr(testZ, testY, betaHat, tau);
+      lossQr(testZ, testY, betaHat, tau, i, dev, devsq);
       betaWarm = betaHat;
     }
   }
-  mse /= n;
-  arma::uword cvIdx = arma::index_min(mse);
+  dev /= n;
+  devsq = arma::sqrt(devsq - n * arma::square(dev)) / n;
+  arma::uword cvIdx = arma::index_min(dev);
   betaHat = gaussGroupLasso(Z, Y, lambdaSeq(cvIdx), tau, group, weight, p, G, 1.0 / n, h, h1, h2, phi0, gamma, epsilon, iteMax);
   betaHat.rows(1, p) %= sx1;
   betaHat(0) += my - arma::as_scalar(mx * betaHat.rows(1, p));
-  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("lambda") = lambdaSeq(cvIdx), Rcpp::Named("deviance") = mse);
-}
-
-// [[Rcpp::export]]
-Rcpp::List cvGaussSparseGroupLasso(const arma::mat& X, arma::vec Y, const arma::vec& lambdaSeq, const arma::vec& folds, const double tau, 
-                                   const int kfolds, const arma::vec& group, const int G, const double h, const double phi0 = 0.01, 
-                                   const double gamma = 1.2, const double epsilon = 0.001, const int iteMax = 500) {
-  const int n = X.n_rows, p = X.n_cols, nlambda = lambdaSeq.size();
-  const double h1 = 1.0 / h, h2 = 1.0 / (h * h);
-  arma::vec betaHat(p + 1);
-  arma::vec mse = arma::zeros(nlambda);
-  arma::rowvec mx = arma::mean(X, 0);
-  arma::vec sx1 = 1.0 / arma::stddev(X, 0, 0).t();
-  arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
-  double my = arma::mean(Y);
-  Y -= my;
-  arma::vec weight = arma::zeros(G);
-  for (int i = 1; i <= p; i++) {
-    weight(group(i)) += 1;
-  }
-  weight = arma::sqrt(weight);
-  for (int j = 1; j <= kfolds; j++) {
-    arma::uvec idx = arma::find(folds == j);
-    arma::uvec idxComp = arma::find(folds != j);
-    double n1Train = 1.0 / idxComp.size();
-    arma::mat trainZ = Z.rows(idxComp), testZ = Z.rows(idx);
-    arma::vec trainY = Y.rows(idxComp), testY = Y.rows(idx);
-    for (int i = 0; i < nlambda; i++) {
-      betaHat = gaussSparseGroupLasso(trainZ, trainY, lambdaSeq(i), tau, group, weight, p, G, n1Train, h, h1, h2, phi0, gamma, epsilon, iteMax);
-      mse(i) += lossQr(testZ, testY, betaHat, tau);
-    }
-  }
-  mse /= n;
-  arma::uword cvIdx = arma::index_min(mse);
-  betaHat = gaussSparseGroupLasso(Z, Y, lambdaSeq(cvIdx), tau, group, weight, p, G, 1.0 / n, h, h1, h2, phi0, gamma, epsilon, iteMax);
-  betaHat.rows(1, p) %= sx1;
-  betaHat(0) += my - arma::as_scalar(mx * betaHat.rows(1, p));
-  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("lambda") = lambdaSeq(cvIdx), Rcpp::Named("deviance") = mse);
+  arma::uword seIdx = arma::max(arma::find(dev <= dev(cvIdx) + devsq(cvIdx)));
+  arma::vec betaHatSe = gaussGroupLasso(Z, Y, lambdaSeq(seIdx), tau, group, weight, p, G, 1.0 / n, h, h1, h2, phi0, gamma, epsilon, iteMax);
+  betaHatSe.rows(1, p) %= sx1;
+  betaHatSe(0) += my - arma::as_scalar(mx * betaHatSe.rows(1, p));
+  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("coeffSe") = betaHatSe, Rcpp::Named("lambdaMin") = lambdaSeq(cvIdx), 
+                            Rcpp::Named("lambdaSe") = lambdaSeq(seIdx), Rcpp::Named("deviance") = dev, Rcpp::Named("devianceSd") = devsq);
 }
 
 // [[Rcpp::export]]
 Rcpp::List cvGaussSparseGroupLassoWarm(const arma::mat& X, arma::vec Y, const arma::vec& lambdaSeq, const arma::vec& folds, const double tau, 
-                                       const int kfolds, const arma::vec& group, const int G, const double h, const double phi0 = 0.01, 
+                                       const int kfolds, const arma::vec& group, const arma::vec& weight, const int G, const double h, const double phi0 = 0.01, 
                                        const double gamma = 1.2, const double epsilon = 0.001, const int iteMax = 500) {
   const int n = X.n_rows, p = X.n_cols, nlambda = lambdaSeq.size();
   const double h1 = 1.0 / h, h2 = 1.0 / (h * h);
   arma::vec betaHat(p + 1), betaWarm(p + 1);
-  arma::vec mse = arma::zeros(nlambda);
+  arma::vec dev = arma::zeros(nlambda);
+  arma::vec devsq = arma::zeros(nlambda);
   arma::rowvec mx = arma::mean(X, 0);
   arma::vec sx1 = 1.0 / arma::stddev(X, 0, 0).t();
   arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
   double my = arma::mean(Y);
   Y -= my;
-  arma::vec weight = arma::zeros(G);
-  for (int i = 1; i <= p; i++) {
-    weight(group(i)) += 1;
-  }
-  weight = arma::sqrt(weight);
   for (int j = 1; j <= kfolds; j++) {
     arma::uvec idx = arma::find(folds == j);
     arma::uvec idxComp = arma::find(folds != j);
@@ -980,51 +835,25 @@ Rcpp::List cvGaussSparseGroupLassoWarm(const arma::mat& X, arma::vec Y, const ar
     arma::vec trainY = Y.rows(idxComp), testY = Y.rows(idx);
     betaHat = gaussSparseGroupLasso(trainZ, trainY, lambdaSeq(0), tau, group, weight, p, G, n1Train, h, h1, h2, phi0, gamma, epsilon, iteMax);
     betaWarm = betaHat;
-    mse(0) += lossQr(testZ, testY, betaHat, tau);
+    lossQr(testZ, testY, betaHat, tau, 0, dev, devsq);
     for (int i = 1; i < nlambda; i++) {
       betaHat = gaussSparseGroupLassoWarm(trainZ, trainY, lambdaSeq(i), betaWarm, tau, group, weight, p, G, n1Train, h, h1, h2, phi0, gamma, epsilon, iteMax);
-      mse(i) += lossQr(testZ, testY, betaHat, tau);
+      lossQr(testZ, testY, betaHat, tau, i, dev, devsq);
       betaWarm = betaHat;
     }
   }
-  mse /= n;
-  arma::uword cvIdx = arma::index_min(mse);
+  dev /= n;
+  devsq = arma::sqrt(devsq - n * arma::square(dev)) / n;
+  arma::uword cvIdx = arma::index_min(dev);
   betaHat = gaussSparseGroupLasso(Z, Y, lambdaSeq(cvIdx), tau, group, weight, p, G, 1.0 / n, h, h1, h2, phi0, gamma, epsilon, iteMax);
   betaHat.rows(1, p) %= sx1;
   betaHat(0) += my - arma::as_scalar(mx * betaHat.rows(1, p));
-  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("lambda") = lambdaSeq(cvIdx), Rcpp::Named("deviance") = mse);
-}
-
-// [[Rcpp::export]]
-Rcpp::List cvGaussScad(const arma::mat& X, arma::vec Y, const arma::vec& lambdaSeq, const arma::vec& folds, const double tau, const int kfolds, 
-                       const double h, const double phi0 = 0.01, const double gamma = 1.2, const double epsilon = 0.001, const int iteMax = 500,
-                       const int iteTight = 3, const double para = 3.7) {
-  const int n = X.n_rows, p = X.n_cols, nlambda = lambdaSeq.size();
-  const double h1 = 1.0 / h, h2 = 1.0 / (h * h);
-  arma::vec betaHat(p + 1);
-  arma::vec mse = arma::zeros(nlambda);
-  arma::rowvec mx = arma::mean(X, 0);
-  arma::vec sx1 = 1.0 / arma::stddev(X, 0, 0).t();
-  arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
-  double my = arma::mean(Y);
-  Y -= my;
-  for (int j = 1; j <= kfolds; j++) {
-    arma::uvec idx = arma::find(folds == j);
-    arma::uvec idxComp = arma::find(folds != j);
-    double n1Train = 1.0 / idxComp.size();
-    arma::mat trainZ = Z.rows(idxComp), testZ = Z.rows(idx);
-    arma::vec trainY = Y.rows(idxComp), testY = Y.rows(idx);
-    for (int i = 0; i < nlambda; i++) {
-      betaHat = gaussScad(trainZ, trainY, lambdaSeq(i), tau, p, n1Train, h, h1, h2, phi0, gamma, epsilon, iteMax, iteTight, para);
-      mse(i) += lossQr(testZ, testY, betaHat, tau);
-    }
-  }
-  mse /= n;
-  arma::uword cvIdx = arma::index_min(mse);
-  betaHat = gaussScad(Z, Y, lambdaSeq(cvIdx), tau, p, 1.0 / n, h, h1, h2, phi0, gamma, epsilon, iteMax, iteTight, para);
-  betaHat.rows(1, p) %= sx1;
-  betaHat(0) += my - arma::as_scalar(mx * betaHat.rows(1, p));
-  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("lambda") = lambdaSeq(cvIdx), Rcpp::Named("deviance") = mse);
+  arma::uword seIdx = arma::max(arma::find(dev <= dev(cvIdx) + devsq(cvIdx)));
+  arma::vec betaHatSe = gaussSparseGroupLasso(Z, Y, lambdaSeq(seIdx), tau, group, weight, p, G, 1.0 / n, h, h1, h2, phi0, gamma, epsilon, iteMax);
+  betaHatSe.rows(1, p) %= sx1;
+  betaHatSe(0) += my - arma::as_scalar(mx * betaHatSe.rows(1, p));
+  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("coeffSe") = betaHatSe, Rcpp::Named("lambdaMin") = lambdaSeq(cvIdx),
+                            Rcpp::Named("lambdaSe") = lambdaSeq(seIdx), Rcpp::Named("deviance") = dev, Rcpp::Named("devianceSd") = devsq);
 }
 
 // [[Rcpp::export]]
@@ -1034,7 +863,8 @@ Rcpp::List cvGaussScadWarm(const arma::mat& X, arma::vec Y, const arma::vec& lam
   const int n = X.n_rows, p = X.n_cols, nlambda = lambdaSeq.size();
   const double h1 = 1.0 / h, h2 = 1.0 / (h * h);
   arma::vec betaHat(p + 1), betaWarm(p + 1);
-  arma::vec mse = arma::zeros(nlambda);
+  arma::vec dev = arma::zeros(nlambda);
+  arma::vec devsq = arma::zeros(nlambda);
   arma::rowvec mx = arma::mean(X, 0);
   arma::vec sx1 = 1.0 / arma::stddev(X, 0, 0).t();
   arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
@@ -1048,51 +878,25 @@ Rcpp::List cvGaussScadWarm(const arma::mat& X, arma::vec Y, const arma::vec& lam
     arma::vec trainY = Y.rows(idxComp), testY = Y.rows(idx);
     betaHat = gaussScad(trainZ, trainY, lambdaSeq(0), tau, p, n1Train, h, h1, h2, phi0, gamma, epsilon, iteMax, iteTight, para);
     betaWarm = betaHat;
-    mse(0) += lossQr(testZ, testY, betaHat, tau);
+    lossQr(testZ, testY, betaHat, tau, 0, dev, devsq);
     for (int i = 1; i < nlambda; i++) {
       betaHat = gaussScadWarm(trainZ, trainY, lambdaSeq(i), betaWarm, tau, p, n1Train, h, h1, h2, phi0, gamma, epsilon, iteMax, para);
-      mse(i) += lossQr(testZ, testY, betaHat, tau);
+      lossQr(testZ, testY, betaHat, tau, i, dev, devsq);
       betaWarm = betaHat;
     }
   }
-  mse /= n;
-  arma::uword cvIdx = arma::index_min(mse);
+  dev /= n;
+  devsq = arma::sqrt(devsq - n * arma::square(dev)) / n;
+  arma::uword cvIdx = arma::index_min(dev);
   betaHat = gaussScad(Z, Y, lambdaSeq(cvIdx), tau, p, 1.0 / n, h, h1, h2, phi0, gamma, epsilon, iteMax, iteTight, para);
   betaHat.rows(1, p) %= sx1;
   betaHat(0) += my - arma::as_scalar(mx * betaHat.rows(1, p));
-  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("lambda") = lambdaSeq(cvIdx), Rcpp::Named("deviance") = mse);
-}
-
-// [[Rcpp::export]]
-Rcpp::List cvGaussMcp(const arma::mat& X, arma::vec Y, const arma::vec& lambdaSeq, const arma::vec& folds, const double tau, const int kfolds, 
-                          const double h, const double phi0 = 0.01, const double gamma = 1.5, const double epsilon = 0.001, const int iteMax = 500,
-                          const int iteTight = 3, const double para = 3) {
-  const int n = X.n_rows, p = X.n_cols, nlambda = lambdaSeq.size();
-  const double h1 = 1.0 / h, h2 = 1.0 / (h * h);
-  arma::vec betaHat(p + 1);
-  arma::vec mse = arma::zeros(nlambda);
-  arma::rowvec mx = arma::mean(X, 0);
-  arma::vec sx1 = 1.0 / arma::stddev(X, 0, 0).t();
-  arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
-  double my = arma::mean(Y);
-  Y -= my;
-  for (int j = 1; j <= kfolds; j++) {
-    arma::uvec idx = arma::find(folds == j);
-    arma::uvec idxComp = arma::find(folds != j);
-    double n1Train = 1.0 / idxComp.size();
-    arma::mat trainZ = Z.rows(idxComp), testZ = Z.rows(idx);
-    arma::vec trainY = Y.rows(idxComp), testY = Y.rows(idx);
-    for (int i = 0; i < nlambda; i++) {
-      betaHat = gaussMcp(trainZ, trainY, lambdaSeq(i), tau, p, n1Train, h, h1, h2, phi0, gamma, epsilon, iteMax, iteTight, para);
-      mse(i) += lossQr(testZ, testY, betaHat, tau);
-    }
-  }
-  mse /= n;
-  arma::uword cvIdx = arma::index_min(mse);
-  betaHat = gaussMcp(Z, Y, lambdaSeq(cvIdx), tau, p, 1.0 / n, h, h1, h2, phi0, gamma, epsilon, iteMax, iteTight, para);
-  betaHat.rows(1, p) %= sx1;
-  betaHat(0) += my - arma::as_scalar(mx * betaHat.rows(1, p));
-  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("lambda") = lambdaSeq(cvIdx), Rcpp::Named("deviance") = mse);
+  arma::uword seIdx = arma::max(arma::find(dev <= dev(cvIdx) + devsq(cvIdx)));
+  arma::vec betaHatSe = gaussScad(Z, Y, lambdaSeq(seIdx), tau, p, 1.0 / n, h, h1, h2, phi0, gamma, epsilon, iteMax, iteTight, para);
+  betaHatSe.rows(1, p) %= sx1;
+  betaHatSe(0) += my - arma::as_scalar(mx * betaHatSe.rows(1, p));
+  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("coeffSe") = betaHatSe, Rcpp::Named("lambdaMin") = lambdaSeq(cvIdx),
+                            Rcpp::Named("lambdaSe") = lambdaSeq(seIdx), Rcpp::Named("deviance") = dev, Rcpp::Named("devianceSd") = devsq);
 }
 
 // [[Rcpp::export]]
@@ -1102,7 +906,8 @@ Rcpp::List cvGaussMcpWarm(const arma::mat& X, arma::vec Y, const arma::vec& lamb
   const int n = X.n_rows, p = X.n_cols, nlambda = lambdaSeq.size();
   const double h1 = 1.0 / h, h2 = 1.0 / (h * h);
   arma::vec betaHat(p + 1), betaWarm(p + 1);
-  arma::vec mse = arma::zeros(nlambda);
+  arma::vec dev = arma::zeros(nlambda);
+  arma::vec devsq = arma::zeros(nlambda);
   arma::rowvec mx = arma::mean(X, 0);
   arma::vec sx1 = 1.0 / arma::stddev(X, 0, 0).t();
   arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
@@ -1116,18 +921,24 @@ Rcpp::List cvGaussMcpWarm(const arma::mat& X, arma::vec Y, const arma::vec& lamb
     arma::vec trainY = Y.rows(idxComp), testY = Y.rows(idx);
     betaHat = gaussMcp(trainZ, trainY, lambdaSeq(0), tau, p, n1Train, h, h1, h2, phi0, gamma, epsilon, iteMax, iteTight, para);
     betaWarm = betaHat;
-    mse(0) += lossQr(testZ, testY, betaHat, tau);
+    lossQr(testZ, testY, betaHat, tau, 0, dev, devsq);
     for (int i = 1; i < nlambda; i++) {
       betaHat = gaussMcpWarm(trainZ, trainY, lambdaSeq(i), betaWarm, tau, p, n1Train, h, h1, h2, phi0, gamma, epsilon, iteMax, para);
-      mse(i) += lossQr(testZ, testY, betaHat, tau);
+      lossQr(testZ, testY, betaHat, tau, i, dev, devsq);
       betaWarm = betaHat;
     }
   }
-  mse /= n;
-  arma::uword cvIdx = arma::index_min(mse);
+  dev /= n;
+  devsq = arma::sqrt(devsq - n * arma::square(dev)) / n;
+  arma::uword cvIdx = arma::index_min(dev);
   betaHat = gaussMcp(Z, Y, lambdaSeq(cvIdx), tau, p, 1.0 / n, h, h1, h2, phi0, gamma, epsilon, iteMax, iteTight, para);
   betaHat.rows(1, p) %= sx1;
   betaHat(0) += my - arma::as_scalar(mx * betaHat.rows(1, p));
-  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("lambda") = lambdaSeq(cvIdx), Rcpp::Named("deviance") = mse);
+  arma::uword seIdx = arma::max(arma::find(dev <= dev(cvIdx) + devsq(cvIdx)));
+  arma::vec betaHatSe = gaussMcp(Z, Y, lambdaSeq(seIdx), tau, p, 1.0 / n, h, h1, h2, phi0, gamma, epsilon, iteMax, iteTight, para);
+  betaHatSe.rows(1, p) %= sx1;
+  betaHatSe(0) += my - arma::as_scalar(mx * betaHatSe.rows(1, p));
+  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("coeffSe") = betaHatSe, Rcpp::Named("lambdaMin") = lambdaSeq(cvIdx),
+                            Rcpp::Named("lambdaSe") = lambdaSeq(seIdx), Rcpp::Named("deviance") = dev, Rcpp::Named("devianceSd") = devsq);
 }
 

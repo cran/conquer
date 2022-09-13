@@ -12,7 +12,9 @@ conquer.process(
   h = 0,
   checkSing = FALSE,
   tol = 1e-04,
-  iteMax = 5000
+  iteMax = 5000,
+  stepBounded = TRUE,
+  stepMax = 100
 )
 }
 \arguments{
@@ -24,13 +26,17 @@ conquer.process(
 
 \item{kernel}{(\strong{optional})  A character string specifying the choice of kernel function. Default is "Gaussian". Choices are "Gaussian", "logistic", "uniform", "parabolic" and "triangular".}
 
-\item{h}{(\strong{optional}) The bandwidth/smoothing parameter. Default is \eqn{\max\{((log(n) + p) / n)^{0.4}, 0.05\}}. The default will be used if the input value is less than or equal to 0.05.}
+\item{h}{(\strong{optional}) The bandwidth/smoothing parameter. Default is \eqn{\max\{((log(n) + p) / n)^{0.4}, 0.05\}}. The default will be used if the input value is less than or equal to 0.}
 
 \item{checkSing}{(\strong{optional}) A logical flag. Default is FALSE. If \code{checkSing = TRUE}, then it will check if the design matrix is singular before running conquer.}
 
 \item{tol}{(\strong{optional}) Tolerance level of the gradient descent algorithm. The iteration will stop when the maximum magnitude of all the elements of the gradient is less than \code{tol}. Default is 1e-04.}
 
 \item{iteMax}{(\strong{optional}) Maximum number of iterations. Default is 5000.}
+
+\item{stepBounded}{(\strong{optional}) A logical flag. Default is TRUE.  If \code{stepBounded = TRUE}, then the step size of gradient descent is upper bounded by \code{stepMax}. If \code{stepBounded = FALSE}, then the step size is unbounded.}
+
+\item{stepMax}{(\strong{optional}) Maximum bound for the gradient descent step size. Default is 100.}
 }
 \value{
 An object containing the following items will be returned:

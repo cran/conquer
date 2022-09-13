@@ -543,7 +543,7 @@ arma::mat conquerTrianElasticSeq(const arma::mat& X, arma::vec Y, const arma::ve
 }
 
 // [[Rcpp::export]]
-arma::vec conquerTrianGroupLasso(const arma::mat& X, arma::vec Y, const double lambda, const double tau, const arma::vec& group, const int G, 
+arma::vec conquerTrianGroupLasso(const arma::mat& X, arma::vec Y, const double lambda, const double tau, const arma::vec& group, const arma::vec& weight, const int G, 
                                  const double h, const double phi0 = 0.01, const double gamma = 1.2, const double epsilon = 0.001, const int iteMax = 500) {
   const int n = X.n_rows, p = X.n_cols;
   const double h1 = 1.0 / h, h2 = 1.0 / (h * h);
@@ -552,11 +552,6 @@ arma::vec conquerTrianGroupLasso(const arma::mat& X, arma::vec Y, const double l
   arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
   double my = arma::mean(Y);
   Y -= my;
-  arma::vec weight = arma::zeros(G);
-  for (int i = 1; i <= p; i++) {
-    weight(group(i)) += 1;
-  }
-  weight = arma::sqrt(weight);
   arma::vec betaHat = trianGroupLasso(Z, Y, lambda, tau, group, weight, p, G, 1.0 / n, h, h1, h2, phi0, gamma, epsilon, iteMax);
   betaHat.rows(1, p) %= sx1;
   betaHat(0) += my - arma::as_scalar(mx * betaHat.rows(1, p));
@@ -564,7 +559,7 @@ arma::vec conquerTrianGroupLasso(const arma::mat& X, arma::vec Y, const double l
 }
 
 // [[Rcpp::export]]
-arma::mat conquerTrianGroupLassoSeq(const arma::mat& X, arma::vec Y, const arma::vec& lambdaSeq, const double tau, const arma::vec& group, const int G, 
+arma::mat conquerTrianGroupLassoSeq(const arma::mat& X, arma::vec Y, const arma::vec& lambdaSeq, const double tau, const arma::vec& group, const arma::vec& weight, const int G, 
                                     const double h, const double phi0 = 0.01, const double gamma = 1.2, const double epsilon = 0.001, const int iteMax = 500) {
   const int n = X.n_rows, p = X.n_cols, nlambda = lambdaSeq.size();
   const double h1 = 1.0 / h, h2 = 1.0 / (h * h), n1 = 1.0 / n;
@@ -573,11 +568,6 @@ arma::mat conquerTrianGroupLassoSeq(const arma::mat& X, arma::vec Y, const arma:
   arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
   double my = arma::mean(Y);
   Y -= my;
-  arma::vec weight = arma::zeros(G);
-  for (int i = 1; i <= p; i++) {
-    weight(group(i)) += 1;
-  }
-  weight = arma::sqrt(weight);
   arma::mat betaSeq(p + 1, nlambda);
   arma::vec betaHat = trianGroupLasso(Z, Y, lambdaSeq(0), tau, group, weight, p, G, n1, h, h1, h2, phi0, gamma, epsilon, iteMax);
   arma::vec betaWarm = betaHat;
@@ -591,7 +581,7 @@ arma::mat conquerTrianGroupLassoSeq(const arma::mat& X, arma::vec Y, const arma:
 }
 
 // [[Rcpp::export]]
-arma::vec conquerTrianSparseGroupLasso(const arma::mat& X, arma::vec Y, const double lambda, const double tau, const arma::vec& group, const int G, 
+arma::vec conquerTrianSparseGroupLasso(const arma::mat& X, arma::vec Y, const double lambda, const double tau, const arma::vec& group, const arma::vec& weight, const int G, 
                                        const double h, const double phi0 = 0.01, const double gamma = 1.2, const double epsilon = 0.001, 
                                        const int iteMax = 500) {
   const int n = X.n_rows, p = X.n_cols;
@@ -601,11 +591,6 @@ arma::vec conquerTrianSparseGroupLasso(const arma::mat& X, arma::vec Y, const do
   arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
   double my = arma::mean(Y);
   Y -= my;
-  arma::vec weight = arma::zeros(G);
-  for (int i = 1; i <= p; i++) {
-    weight(group(i)) += 1;
-  }
-  weight = arma::sqrt(weight);
   arma::vec betaHat = trianSparseGroupLasso(Z, Y, lambda, tau, group, weight, p, G, 1.0 / n, h, h1, h2, phi0, gamma, epsilon, iteMax);
   betaHat.rows(1, p) %= sx1;
   betaHat(0) += my - arma::as_scalar(mx * betaHat.rows(1, p));
@@ -613,7 +598,7 @@ arma::vec conquerTrianSparseGroupLasso(const arma::mat& X, arma::vec Y, const do
 }
 
 // [[Rcpp::export]]
-arma::mat conquerTrianSparseGroupLassoSeq(const arma::mat& X, arma::vec Y, const arma::vec& lambdaSeq, const double tau, const arma::vec& group, 
+arma::mat conquerTrianSparseGroupLassoSeq(const arma::mat& X, arma::vec Y, const arma::vec& lambdaSeq, const double tau, const arma::vec& group, const arma::vec& weight, 
                                           const int G, const double h, const double phi0 = 0.01, const double gamma = 1.2, const double epsilon = 0.001, 
                                           const int iteMax = 500) {
   const int n = X.n_rows, p = X.n_cols, nlambda = lambdaSeq.size();
@@ -623,11 +608,6 @@ arma::mat conquerTrianSparseGroupLassoSeq(const arma::mat& X, arma::vec Y, const
   arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
   double my = arma::mean(Y);
   Y -= my;
-  arma::vec weight = arma::zeros(G);
-  for (int i = 1; i <= p; i++) {
-    weight(group(i)) += 1;
-  }
-  weight = arma::sqrt(weight);
   arma::mat betaSeq(p + 1, nlambda);
   arma::vec betaHat = trianSparseGroupLasso(Z, Y, lambdaSeq(0), tau, group, weight, p, G, n1, h, h1, h2, phi0, gamma, epsilon, iteMax);
   arma::vec betaWarm = betaHat;
@@ -723,43 +703,13 @@ arma::mat conquerTrianMcpSeq(const arma::mat& X, arma::vec Y, const arma::vec& l
 }
 
 // [[Rcpp::export]]
-Rcpp::List cvTrianLasso(const arma::mat& X, arma::vec Y, const arma::vec& lambdaSeq, const arma::vec& folds, const double tau, const int kfolds, 
-                        const double h, const double phi0 = 0.01, const double gamma = 1.2, const double epsilon = 0.001, const int iteMax = 500) {
-  const int n = X.n_rows, p = X.n_cols, nlambda = lambdaSeq.size();
-  const double h1 = 1.0 / h, h2 = 1.0 / (h * h);
-  arma::vec betaHat(p + 1);
-  arma::vec mse = arma::zeros(nlambda);
-  arma::rowvec mx = arma::mean(X, 0);
-  arma::vec sx1 = 1.0 / arma::stddev(X, 0, 0).t();
-  arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
-  double my = arma::mean(Y);
-  Y -= my;
-  for (int j = 1; j <= kfolds; j++) {
-    arma::uvec idx = arma::find(folds == j);
-    arma::uvec idxComp = arma::find(folds != j);
-    double n1Train = 1.0 / idxComp.size();
-    arma::mat trainZ = Z.rows(idxComp), testZ = Z.rows(idx);
-    arma::vec trainY = Y.rows(idxComp), testY = Y.rows(idx);
-    for (int i = 0; i < nlambda; i++) {
-      betaHat = trianLasso(trainZ, trainY, lambdaSeq(i), tau, p, n1Train, h, h1, h2, phi0, gamma, epsilon, iteMax);
-      mse(i) += lossQr(testZ, testY, betaHat, tau);
-    }
-  }
-  mse /= n;
-  arma::uword cvIdx = arma::index_min(mse);
-  betaHat = trianLasso(Z, Y, lambdaSeq(cvIdx), tau, p, 1.0 / n, h, h1, h2, phi0, gamma, epsilon, iteMax);
-  betaHat.rows(1, p) %= sx1;
-  betaHat(0) += my - arma::as_scalar(mx * betaHat.rows(1, p));
-  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("lambda") = lambdaSeq(cvIdx), Rcpp::Named("deviance") = mse);
-}
-
-// [[Rcpp::export]]
 Rcpp::List cvTrianLassoWarm(const arma::mat& X, arma::vec Y, const arma::vec& lambdaSeq, const arma::vec& folds, const double tau, const int kfolds, 
                             const double h, const double phi0 = 0.01, const double gamma = 1.2, const double epsilon = 0.001, const int iteMax = 500) {
   const int n = X.n_rows, p = X.n_cols, nlambda = lambdaSeq.size();
   const double h1 = 1.0 / h, h2 = 1.0 / (h * h);
   arma::vec betaHat(p + 1), betaWarm(p + 1);
-  arma::vec mse = arma::zeros(nlambda);
+  arma::vec dev = arma::zeros(nlambda);
+  arma::vec devsq = arma::zeros(nlambda);
   arma::rowvec mx = arma::mean(X, 0);
   arma::vec sx1 = 1.0 / arma::stddev(X, 0, 0).t();
   arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
@@ -773,51 +723,25 @@ Rcpp::List cvTrianLassoWarm(const arma::mat& X, arma::vec Y, const arma::vec& la
     arma::vec trainY = Y.rows(idxComp), testY = Y.rows(idx);
     betaHat = trianLasso(trainZ, trainY, lambdaSeq(0), tau, p, n1Train, h, h1, h2, phi0, gamma, epsilon, iteMax);
     betaWarm = betaHat;
-    mse(0) += lossQr(testZ, testY, betaHat, tau);
+    lossQr(testZ, testY, betaHat, tau, 0, dev, devsq);
     for (int i = 1; i < nlambda; i++) {
       betaHat = trianLassoWarm(trainZ, trainY, lambdaSeq(i), betaWarm, tau, p, n1Train, h, h1, h2, phi0, gamma, epsilon, iteMax);
-      mse(i) += lossQr(testZ, testY, betaHat, tau);
+      lossQr(testZ, testY, betaHat, tau, i, dev, devsq);
       betaWarm = betaHat;
     }
   }
-  mse /= n;
-  arma::uword cvIdx = arma::index_min(mse);
+  dev /= n;
+  devsq = arma::sqrt(devsq - n * arma::square(dev)) / n;
+  arma::uword cvIdx = arma::index_min(dev);
   betaHat = trianLasso(Z, Y, lambdaSeq(cvIdx), tau, p, 1.0 / n, h, h1, h2, phi0, gamma, epsilon, iteMax);
   betaHat.rows(1, p) %= sx1;
   betaHat(0) += my - arma::as_scalar(mx * betaHat.rows(1, p));
-  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("lambda") = lambdaSeq(cvIdx), Rcpp::Named("deviance") = mse);
-}
-
-// [[Rcpp::export]]
-Rcpp::List cvTrianElastic(const arma::mat& X, arma::vec Y, const arma::vec& lambdaSeq, const arma::vec& folds, const double tau, const double alpha, 
-                          const int kfolds, const double h, const double phi0 = 0.01, const double gamma = 1.2, const double epsilon = 0.001, 
-                          const int iteMax = 500) {
-  const int n = X.n_rows, p = X.n_cols, nlambda = lambdaSeq.size();
-  const double h1 = 1.0 / h, h2 = 1.0 / (h * h);
-  arma::vec betaHat(p + 1);
-  arma::vec mse = arma::zeros(nlambda);
-  arma::rowvec mx = arma::mean(X, 0);
-  arma::vec sx1 = 1.0 / arma::stddev(X, 0, 0).t();
-  arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
-  double my = arma::mean(Y);
-  Y -= my;
-  for (int j = 1; j <= kfolds; j++) {
-    arma::uvec idx = arma::find(folds == j);
-    arma::uvec idxComp = arma::find(folds != j);
-    double n1Train = 1.0 / idxComp.size();
-    arma::mat trainZ = Z.rows(idxComp), testZ = Z.rows(idx);
-    arma::vec trainY = Y.rows(idxComp), testY = Y.rows(idx);
-    for (int i = 0; i < nlambda; i++) {
-      betaHat = trianElastic(trainZ, trainY, lambdaSeq(i), tau, alpha, p, n1Train, h, h1, h2, phi0, gamma, epsilon, iteMax);
-      mse(i) += lossQr(testZ, testY, betaHat, tau);
-    }
-  }
-  mse /= n;
-  arma::uword cvIdx = arma::index_min(mse);
-  betaHat = trianElastic(Z, Y, lambdaSeq(cvIdx), tau, alpha, p, 1.0 / n, h, h1, h2, phi0, gamma, epsilon, iteMax);
-  betaHat.rows(1, p) %= sx1;
-  betaHat(0) += my - arma::as_scalar(mx * betaHat.rows(1, p));
-  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("lambda") = lambdaSeq(cvIdx), Rcpp::Named("deviance") = mse);
+  arma::uword seIdx = arma::max(arma::find(dev <= dev(cvIdx) + devsq(cvIdx)));
+  arma::vec betaHatSe = trianLasso(Z, Y, lambdaSeq(seIdx), tau, p, 1.0 / n, h, h1, h2, phi0, gamma, epsilon, iteMax);
+  betaHatSe.rows(1, p) %= sx1;
+  betaHatSe(0) += my - arma::as_scalar(mx * betaHatSe.rows(1, p));
+  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("coeffSe") = betaHatSe, Rcpp::Named("lambdaMin") = lambdaSeq(cvIdx), 
+                            Rcpp::Named("lambdaSe") = lambdaSeq(seIdx), Rcpp::Named("deviance") = dev, Rcpp::Named("devianceSd") = devsq);
 }
 
 // [[Rcpp::export]]
@@ -827,7 +751,8 @@ Rcpp::List cvTrianElasticWarm(const arma::mat& X, arma::vec Y, const arma::vec& 
   const int n = X.n_rows, p = X.n_cols, nlambda = lambdaSeq.size();
   const double h1 = 1.0 / h, h2 = 1.0 / (h * h);
   arma::vec betaHat(p + 1), betaWarm(p + 1);
-  arma::vec mse = arma::zeros(nlambda);
+  arma::vec dev = arma::zeros(nlambda);
+  arma::vec devsq = arma::zeros(nlambda);
   arma::rowvec mx = arma::mean(X, 0);
   arma::vec sx1 = 1.0 / arma::stddev(X, 0, 0).t();
   arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
@@ -841,76 +766,41 @@ Rcpp::List cvTrianElasticWarm(const arma::mat& X, arma::vec Y, const arma::vec& 
     arma::vec trainY = Y.rows(idxComp), testY = Y.rows(idx);
     betaHat = trianElastic(trainZ, trainY, lambdaSeq(0), tau, alpha, p, n1Train, h, h1, h2, phi0, gamma, epsilon, iteMax);
     betaWarm = betaHat;
-    mse(0) += lossQr(testZ, testY, betaHat, tau);
+    lossQr(testZ, testY, betaHat, tau, 0, dev, devsq);
     for (int i = 1; i < nlambda; i++) {
       betaHat = trianElasticWarm(trainZ, trainY, lambdaSeq(i), betaWarm, tau, alpha, p, n1Train, h, h1, h2, phi0, gamma, epsilon, iteMax);
-      mse(i) += lossQr(testZ, testY, betaHat, tau);
+      lossQr(testZ, testY, betaHat, tau, i, dev, devsq);
       betaWarm = betaHat;
     }
   }
-  mse /= n;
-  arma::uword cvIdx = arma::index_min(mse);
+  dev /= n;
+  devsq = arma::sqrt(devsq - n * arma::square(dev)) / n;
+  arma::uword cvIdx = arma::index_min(dev);
   betaHat = trianElastic(Z, Y, lambdaSeq(cvIdx), tau, alpha, p, 1.0 / n, h, h1, h2, phi0, gamma, epsilon, iteMax);
   betaHat.rows(1, p) %= sx1;
   betaHat(0) += my - arma::as_scalar(mx * betaHat.rows(1, p));
-  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("lambda") = lambdaSeq(cvIdx), Rcpp::Named("deviance") = mse);
-}
-
-// [[Rcpp::export]]
-Rcpp::List cvTrianGroupLasso(const arma::mat& X, arma::vec Y, const arma::vec& lambdaSeq, const arma::vec& folds, const double tau, const int kfolds, 
-                             const arma::vec& group, const int G, const double h, const double phi0 = 0.01, const double gamma = 1.2, 
-                             const double epsilon = 0.001, const int iteMax = 500) {
-  const int n = X.n_rows, p = X.n_cols, nlambda = lambdaSeq.size();
-  const double h1 = 1.0 / h, h2 = 1.0 / (h * h);
-  arma::vec betaHat(p + 1);
-  arma::vec mse = arma::zeros(nlambda);
-  arma::rowvec mx = arma::mean(X, 0);
-  arma::vec sx1 = 1.0 / arma::stddev(X, 0, 0).t();
-  arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
-  double my = arma::mean(Y);
-  Y -= my;
-  arma::vec weight = arma::zeros(G);
-  for (int i = 1; i <= p; i++) {
-    weight(group(i)) += 1;
-  }
-  weight = arma::sqrt(weight);
-  for (int j = 1; j <= kfolds; j++) {
-    arma::uvec idx = arma::find(folds == j);
-    arma::uvec idxComp = arma::find(folds != j);
-    double n1Train = 1.0 / idxComp.size();
-    arma::mat trainZ = Z.rows(idxComp), testZ = Z.rows(idx);
-    arma::vec trainY = Y.rows(idxComp), testY = Y.rows(idx);
-    for (int i = 0; i < nlambda; i++) {
-      betaHat = trianGroupLasso(trainZ, trainY, lambdaSeq(i), tau, group, weight, p, G, n1Train, h, h1, h2, phi0, gamma, epsilon, iteMax);
-      mse(i) += lossQr(testZ, testY, betaHat, tau);
-    }
-  }
-  mse /= n;
-  arma::uword cvIdx = arma::index_min(mse);
-  betaHat = trianGroupLasso(Z, Y, lambdaSeq(cvIdx), tau, group, weight, p, G, 1.0 / n, h, h1, h2, phi0, gamma, epsilon, iteMax);
-  betaHat.rows(1, p) %= sx1;
-  betaHat(0) += my - arma::as_scalar(mx * betaHat.rows(1, p));
-  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("lambda") = lambdaSeq(cvIdx), Rcpp::Named("deviance") = mse);
+  arma::uword seIdx = arma::max(arma::find(dev <= dev(cvIdx) + devsq(cvIdx)));
+  arma::vec betaHatSe = trianElastic(Z, Y, lambdaSeq(seIdx), tau, alpha, p, 1.0 / n, h, h1, h2, phi0, gamma, epsilon, iteMax);
+  betaHatSe.rows(1, p) %= sx1;
+  betaHatSe(0) += my - arma::as_scalar(mx * betaHatSe.rows(1, p));
+  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("coeffSe") = betaHatSe, Rcpp::Named("lambdaMin") = lambdaSeq(cvIdx), 
+                            Rcpp::Named("lambdaSe") = lambdaSeq(seIdx), Rcpp::Named("deviance") = dev, Rcpp::Named("devianceSd") = devsq);
 }
 
 // [[Rcpp::export]]
 Rcpp::List cvTrianGroupLassoWarm(const arma::mat& X, arma::vec Y, const arma::vec& lambdaSeq, const arma::vec& folds, const double tau, const int kfolds, 
-                                 const arma::vec& group, const int G, const double h, const double phi0 = 0.01, const double gamma = 1.2, 
+                                 const arma::vec& group, const arma::vec& weight, const int G, const double h, const double phi0 = 0.01, const double gamma = 1.2, 
                                  const double epsilon = 0.001, const int iteMax = 500) {
   const int n = X.n_rows, p = X.n_cols, nlambda = lambdaSeq.size();
   const double h1 = 1.0 / h, h2 = 1.0 / (h * h);
   arma::vec betaHat(p + 1), betaWarm(p + 1);
-  arma::vec mse = arma::zeros(nlambda);
+  arma::vec dev = arma::zeros(nlambda);
+  arma::vec devsq = arma::zeros(nlambda);
   arma::rowvec mx = arma::mean(X, 0);
   arma::vec sx1 = 1.0 / arma::stddev(X, 0, 0).t();
   arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
   double my = arma::mean(Y);
   Y -= my;
-  arma::vec weight = arma::zeros(G);
-  for (int i = 1; i <= p; i++) {
-    weight(group(i)) += 1;
-  }
-  weight = arma::sqrt(weight);
   for (int j = 1; j <= kfolds; j++) {
     arma::uvec idx = arma::find(folds == j);
     arma::uvec idxComp = arma::find(folds != j);
@@ -919,76 +809,41 @@ Rcpp::List cvTrianGroupLassoWarm(const arma::mat& X, arma::vec Y, const arma::ve
     arma::vec trainY = Y.rows(idxComp), testY = Y.rows(idx);
     betaHat = trianGroupLasso(trainZ, trainY, lambdaSeq(0), tau, group, weight, p, G, n1Train, h, h1, h2, phi0, gamma, epsilon, iteMax);
     betaWarm = betaHat;
-    mse(0) += lossQr(testZ, testY, betaHat, tau);
+    lossQr(testZ, testY, betaHat, tau, 0, dev, devsq);
     for (int i = 1; i < nlambda; i++) {
       betaHat = trianGroupLassoWarm(trainZ, trainY, lambdaSeq(i), betaWarm, tau, group, weight, p, G, n1Train, h, h1, h2, phi0, gamma, epsilon, iteMax);
-      mse(i) += lossQr(testZ, testY, betaHat, tau);
+      lossQr(testZ, testY, betaHat, tau, i, dev, devsq);
       betaWarm = betaHat;
     }
   }
-  mse /= n;
-  arma::uword cvIdx = arma::index_min(mse);
+  dev /= n;
+  devsq = arma::sqrt(devsq - n * arma::square(dev)) / n;
+  arma::uword cvIdx = arma::index_min(dev);
   betaHat = trianGroupLasso(Z, Y, lambdaSeq(cvIdx), tau, group, weight, p, G, 1.0 / n, h, h1, h2, phi0, gamma, epsilon, iteMax);
   betaHat.rows(1, p) %= sx1;
   betaHat(0) += my - arma::as_scalar(mx * betaHat.rows(1, p));
-  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("lambda") = lambdaSeq(cvIdx), Rcpp::Named("deviance") = mse);
-}
-
-// [[Rcpp::export]]
-Rcpp::List cvTrianSparseGroupLasso(const arma::mat& X, arma::vec Y, const arma::vec& lambdaSeq, const arma::vec& folds, const double tau, 
-                                   const int kfolds, const arma::vec& group, const int G, const double h, const double phi0 = 0.01, 
-                                   const double gamma = 1.2, const double epsilon = 0.001, const int iteMax = 500) {
-  const int n = X.n_rows, p = X.n_cols, nlambda = lambdaSeq.size();
-  const double h1 = 1.0 / h, h2 = 1.0 / (h * h);
-  arma::vec betaHat(p + 1);
-  arma::vec mse = arma::zeros(nlambda);
-  arma::rowvec mx = arma::mean(X, 0);
-  arma::vec sx1 = 1.0 / arma::stddev(X, 0, 0).t();
-  arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
-  double my = arma::mean(Y);
-  Y -= my;
-  arma::vec weight = arma::zeros(G);
-  for (int i = 1; i <= p; i++) {
-    weight(group(i)) += 1;
-  }
-  weight = arma::sqrt(weight);
-  for (int j = 1; j <= kfolds; j++) {
-    arma::uvec idx = arma::find(folds == j);
-    arma::uvec idxComp = arma::find(folds != j);
-    double n1Train = 1.0 / idxComp.size();
-    arma::mat trainZ = Z.rows(idxComp), testZ = Z.rows(idx);
-    arma::vec trainY = Y.rows(idxComp), testY = Y.rows(idx);
-    for (int i = 0; i < nlambda; i++) {
-      betaHat = trianSparseGroupLasso(trainZ, trainY, lambdaSeq(i), tau, group, weight, p, G, n1Train, h, h1, h2, phi0, gamma, epsilon, iteMax);
-      mse(i) += lossQr(testZ, testY, betaHat, tau);
-    }
-  }
-  mse /= n;
-  arma::uword cvIdx = arma::index_min(mse);
-  betaHat = trianSparseGroupLasso(Z, Y, lambdaSeq(cvIdx), tau, group, weight, p, G, 1.0 / n, h, h1, h2, phi0, gamma, epsilon, iteMax);
-  betaHat.rows(1, p) %= sx1;
-  betaHat(0) += my - arma::as_scalar(mx * betaHat.rows(1, p));
-  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("lambda") = lambdaSeq(cvIdx), Rcpp::Named("deviance") = mse);
+  arma::uword seIdx = arma::max(arma::find(dev <= dev(cvIdx) + devsq(cvIdx)));
+  arma::vec betaHatSe = trianGroupLasso(Z, Y, lambdaSeq(seIdx), tau, group, weight, p, G, 1.0 / n, h, h1, h2, phi0, gamma, epsilon, iteMax);
+  betaHatSe.rows(1, p) %= sx1;
+  betaHatSe(0) += my - arma::as_scalar(mx * betaHatSe.rows(1, p));
+  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("coeffSe") = betaHatSe, Rcpp::Named("lambdaMin") = lambdaSeq(cvIdx), 
+                            Rcpp::Named("lambdaSe") = lambdaSeq(seIdx), Rcpp::Named("deviance") = dev, Rcpp::Named("devianceSd") = devsq);
 }
 
 // [[Rcpp::export]]
 Rcpp::List cvTrianSparseGroupLassoWarm(const arma::mat& X, arma::vec Y, const arma::vec& lambdaSeq, const arma::vec& folds, const double tau, 
-                                       const int kfolds, const arma::vec& group, const int G, const double h, const double phi0 = 0.01, 
+                                       const int kfolds, const arma::vec& group, const arma::vec& weight, const int G, const double h, const double phi0 = 0.01, 
                                        const double gamma = 1.2, const double epsilon = 0.001, const int iteMax = 500) {
   const int n = X.n_rows, p = X.n_cols, nlambda = lambdaSeq.size();
   const double h1 = 1.0 / h, h2 = 1.0 / (h * h);
   arma::vec betaHat(p + 1), betaWarm(p + 1);
-  arma::vec mse = arma::zeros(nlambda);
+  arma::vec dev = arma::zeros(nlambda);
+  arma::vec devsq = arma::zeros(nlambda);
   arma::rowvec mx = arma::mean(X, 0);
   arma::vec sx1 = 1.0 / arma::stddev(X, 0, 0).t();
   arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
   double my = arma::mean(Y);
   Y -= my;
-  arma::vec weight = arma::zeros(G);
-  for (int i = 1; i <= p; i++) {
-    weight(group(i)) += 1;
-  }
-  weight = arma::sqrt(weight);
   for (int j = 1; j <= kfolds; j++) {
     arma::uvec idx = arma::find(folds == j);
     arma::uvec idxComp = arma::find(folds != j);
@@ -997,51 +852,25 @@ Rcpp::List cvTrianSparseGroupLassoWarm(const arma::mat& X, arma::vec Y, const ar
     arma::vec trainY = Y.rows(idxComp), testY = Y.rows(idx);
     betaHat = trianSparseGroupLasso(trainZ, trainY, lambdaSeq(0), tau, group, weight, p, G, n1Train, h, h1, h2, phi0, gamma, epsilon, iteMax);
     betaWarm = betaHat;
-    mse(0) += lossQr(testZ, testY, betaHat, tau);
+    lossQr(testZ, testY, betaHat, tau, 0, dev, devsq);
     for (int i = 1; i < nlambda; i++) {
       betaHat = trianSparseGroupLassoWarm(trainZ, trainY, lambdaSeq(i), betaWarm, tau, group, weight, p, G, n1Train, h, h1, h2, phi0, gamma, epsilon, iteMax);
-      mse(i) += lossQr(testZ, testY, betaHat, tau);
+      lossQr(testZ, testY, betaHat, tau, i, dev, devsq);
       betaWarm = betaHat;
     }
   }
-  mse /= n;
-  arma::uword cvIdx = arma::index_min(mse);
+  dev /= n;
+  devsq = arma::sqrt(devsq - n * arma::square(dev)) / n;
+  arma::uword cvIdx = arma::index_min(dev);
   betaHat = trianSparseGroupLasso(Z, Y, lambdaSeq(cvIdx), tau, group, weight, p, G, 1.0 / n, h, h1, h2, phi0, gamma, epsilon, iteMax);
   betaHat.rows(1, p) %= sx1;
   betaHat(0) += my - arma::as_scalar(mx * betaHat.rows(1, p));
-  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("lambda") = lambdaSeq(cvIdx), Rcpp::Named("deviance") = mse);
-}
-
-// [[Rcpp::export]]
-Rcpp::List cvTrianScad(const arma::mat& X, arma::vec Y, const arma::vec& lambdaSeq, const arma::vec& folds, const double tau, const int kfolds, 
-                       const double h, const double phi0 = 0.01, const double gamma = 1.2, const double epsilon = 0.001, const int iteMax = 500,
-                       const int iteTight = 3, const double para = 3.7) {
-  const int n = X.n_rows, p = X.n_cols, nlambda = lambdaSeq.size();
-  const double h1 = 1.0 / h, h2 = 1.0 / (h * h);
-  arma::vec betaHat(p + 1);
-  arma::vec mse = arma::zeros(nlambda);
-  arma::rowvec mx = arma::mean(X, 0);
-  arma::vec sx1 = 1.0 / arma::stddev(X, 0, 0).t();
-  arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
-  double my = arma::mean(Y);
-  Y -= my;
-  for (int j = 1; j <= kfolds; j++) {
-    arma::uvec idx = arma::find(folds == j);
-    arma::uvec idxComp = arma::find(folds != j);
-    double n1Train = 1.0 / idxComp.size();
-    arma::mat trainZ = Z.rows(idxComp), testZ = Z.rows(idx);
-    arma::vec trainY = Y.rows(idxComp), testY = Y.rows(idx);
-    for (int i = 0; i < nlambda; i++) {
-      betaHat = trianScad(trainZ, trainY, lambdaSeq(i), tau, p, n1Train, h, h1, h2, phi0, gamma, epsilon, iteMax, iteTight, para);
-      mse(i) += lossQr(testZ, testY, betaHat, tau);
-    }
-  }
-  mse /= n;
-  arma::uword cvIdx = arma::index_min(mse);
-  betaHat = trianScad(Z, Y, lambdaSeq(cvIdx), tau, p, 1.0 / n, h, h1, h2, phi0, gamma, epsilon, iteMax, iteTight, para);
-  betaHat.rows(1, p) %= sx1;
-  betaHat(0) += my - arma::as_scalar(mx * betaHat.rows(1, p));
-  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("lambda") = lambdaSeq(cvIdx), Rcpp::Named("deviance") = mse);
+  arma::uword seIdx = arma::max(arma::find(dev <= dev(cvIdx) + devsq(cvIdx)));
+  arma::vec betaHatSe = trianSparseGroupLasso(Z, Y, lambdaSeq(seIdx), tau, group, weight, p, G, 1.0 / n, h, h1, h2, phi0, gamma, epsilon, iteMax);
+  betaHatSe.rows(1, p) %= sx1;
+  betaHatSe(0) += my - arma::as_scalar(mx * betaHatSe.rows(1, p));
+  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("coeffSe") = betaHatSe, Rcpp::Named("lambdaMin") = lambdaSeq(cvIdx), 
+                            Rcpp::Named("lambdaSe") = lambdaSeq(seIdx), Rcpp::Named("deviance") = dev, Rcpp::Named("devianceSd") = devsq);
 }
 
 // [[Rcpp::export]]
@@ -1051,7 +880,8 @@ Rcpp::List cvTrianScadWarm(const arma::mat& X, arma::vec Y, const arma::vec& lam
   const int n = X.n_rows, p = X.n_cols, nlambda = lambdaSeq.size();
   const double h1 = 1.0 / h, h2 = 1.0 / (h * h);
   arma::vec betaHat(p + 1), betaWarm(p + 1);
-  arma::vec mse = arma::zeros(nlambda);
+  arma::vec dev = arma::zeros(nlambda);
+  arma::vec devsq = arma::zeros(nlambda);
   arma::rowvec mx = arma::mean(X, 0);
   arma::vec sx1 = 1.0 / arma::stddev(X, 0, 0).t();
   arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
@@ -1065,51 +895,25 @@ Rcpp::List cvTrianScadWarm(const arma::mat& X, arma::vec Y, const arma::vec& lam
     arma::vec trainY = Y.rows(idxComp), testY = Y.rows(idx);
     betaHat = trianScad(trainZ, trainY, lambdaSeq(0), tau, p, n1Train, h, h1, h2, phi0, gamma, epsilon, iteMax, iteTight, para);
     betaWarm = betaHat;
-    mse(0) += lossQr(testZ, testY, betaHat, tau);
+    lossQr(testZ, testY, betaHat, tau, 0, dev, devsq);
     for (int i = 1; i < nlambda; i++) {
       betaHat = trianScadWarm(trainZ, trainY, lambdaSeq(i), betaWarm, tau, p, n1Train, h, h1, h2, phi0, gamma, epsilon, iteMax, para);
-      mse(i) += lossQr(testZ, testY, betaHat, tau);
+      lossQr(testZ, testY, betaHat, tau, i, dev, devsq);
       betaWarm = betaHat;
     }
   }
-  mse /= n;
-  arma::uword cvIdx = arma::index_min(mse);
+  dev /= n;
+  devsq = arma::sqrt(devsq - n * arma::square(dev)) / n;
+  arma::uword cvIdx = arma::index_min(dev);
   betaHat = trianScad(Z, Y, lambdaSeq(cvIdx), tau, p, 1.0 / n, h, h1, h2, phi0, gamma, epsilon, iteMax, iteTight, para);
   betaHat.rows(1, p) %= sx1;
   betaHat(0) += my - arma::as_scalar(mx * betaHat.rows(1, p));
-  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("lambda") = lambdaSeq(cvIdx), Rcpp::Named("deviance") = mse);
-}
-
-// [[Rcpp::export]]
-Rcpp::List cvTrianMcp(const arma::mat& X, arma::vec Y, const arma::vec& lambdaSeq, const arma::vec& folds, const double tau, const int kfolds, 
-                      const double h, const double phi0 = 0.01, const double gamma = 1.5, const double epsilon = 0.001, const int iteMax = 500,
-                      const int iteTight = 3, const double para = 3) {
-  const int n = X.n_rows, p = X.n_cols, nlambda = lambdaSeq.size();
-  const double h1 = 1.0 / h, h2 = 1.0 / (h * h);
-  arma::vec betaHat(p + 1);
-  arma::vec mse = arma::zeros(nlambda);
-  arma::rowvec mx = arma::mean(X, 0);
-  arma::vec sx1 = 1.0 / arma::stddev(X, 0, 0).t();
-  arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
-  double my = arma::mean(Y);
-  Y -= my;
-  for (int j = 1; j <= kfolds; j++) {
-    arma::uvec idx = arma::find(folds == j);
-    arma::uvec idxComp = arma::find(folds != j);
-    double n1Train = 1.0 / idxComp.size();
-    arma::mat trainZ = Z.rows(idxComp), testZ = Z.rows(idx);
-    arma::vec trainY = Y.rows(idxComp), testY = Y.rows(idx);
-    for (int i = 0; i < nlambda; i++) {
-      betaHat = trianMcp(trainZ, trainY, lambdaSeq(i), tau, p, n1Train, h, h1, h2, phi0, gamma, epsilon, iteMax, iteTight, para);
-      mse(i) += lossQr(testZ, testY, betaHat, tau);
-    }
-  }
-  mse /= n;
-  arma::uword cvIdx = arma::index_min(mse);
-  betaHat = trianMcp(Z, Y, lambdaSeq(cvIdx), tau, p, 1.0 / n, h, h1, h2, phi0, gamma, epsilon, iteMax, iteTight, para);
-  betaHat.rows(1, p) %= sx1;
-  betaHat(0) += my - arma::as_scalar(mx * betaHat.rows(1, p));
-  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("lambda") = lambdaSeq(cvIdx), Rcpp::Named("deviance") = mse);
+  arma::uword seIdx = arma::max(arma::find(dev <= dev(cvIdx) + devsq(cvIdx)));
+  arma::vec betaHatSe = trianScad(Z, Y, lambdaSeq(seIdx), tau, p, 1.0 / n, h, h1, h2, phi0, gamma, epsilon, iteMax, iteTight, para);
+  betaHatSe.rows(1, p) %= sx1;
+  betaHatSe(0) += my - arma::as_scalar(mx * betaHatSe.rows(1, p));
+  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("coeffSe") = betaHatSe, Rcpp::Named("lambdaMin") = lambdaSeq(cvIdx), 
+                            Rcpp::Named("lambdaSe") = lambdaSeq(seIdx), Rcpp::Named("deviance") = dev, Rcpp::Named("devianceSd") = devsq);
 }
 
 // [[Rcpp::export]]
@@ -1119,7 +923,8 @@ Rcpp::List cvTrianMcpWarm(const arma::mat& X, arma::vec Y, const arma::vec& lamb
   const int n = X.n_rows, p = X.n_cols, nlambda = lambdaSeq.size();
   const double h1 = 1.0 / h, h2 = 1.0 / (h * h);
   arma::vec betaHat(p + 1), betaWarm(p + 1);
-  arma::vec mse = arma::zeros(nlambda);
+  arma::vec dev = arma::zeros(nlambda);
+  arma::vec devsq = arma::zeros(nlambda);
   arma::rowvec mx = arma::mean(X, 0);
   arma::vec sx1 = 1.0 / arma::stddev(X, 0, 0).t();
   arma::mat Z = arma::join_rows(arma::ones(n), standardize(X, mx, sx1, p));
@@ -1133,18 +938,24 @@ Rcpp::List cvTrianMcpWarm(const arma::mat& X, arma::vec Y, const arma::vec& lamb
     arma::vec trainY = Y.rows(idxComp), testY = Y.rows(idx);
     betaHat = trianMcp(trainZ, trainY, lambdaSeq(0), tau, p, n1Train, h, h1, h2, phi0, gamma, epsilon, iteMax, iteTight, para);
     betaWarm = betaHat;
-    mse(0) += lossQr(testZ, testY, betaHat, tau);
+    lossQr(testZ, testY, betaHat, tau, 0, dev, devsq);
     for (int i = 1; i < nlambda; i++) {
       betaHat = trianMcpWarm(trainZ, trainY, lambdaSeq(i), betaWarm, tau, p, n1Train, h, h1, h2, phi0, gamma, epsilon, iteMax, para);
-      mse(i) += lossQr(testZ, testY, betaHat, tau);
+      lossQr(testZ, testY, betaHat, tau, i, dev, devsq);
       betaWarm = betaHat;
     }
   }
-  mse /= n;
-  arma::uword cvIdx = arma::index_min(mse);
+  dev /= n;
+  devsq = arma::sqrt(devsq - n * arma::square(dev)) / n;
+  arma::uword cvIdx = arma::index_min(dev);
   betaHat = trianMcp(Z, Y, lambdaSeq(cvIdx), tau, p, 1.0 / n, h, h1, h2, phi0, gamma, epsilon, iteMax, iteTight, para);
   betaHat.rows(1, p) %= sx1;
   betaHat(0) += my - arma::as_scalar(mx * betaHat.rows(1, p));
-  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("lambda") = lambdaSeq(cvIdx), Rcpp::Named("deviance") = mse);
+  arma::uword seIdx = arma::max(arma::find(dev <= dev(cvIdx) + devsq(cvIdx)));
+  arma::vec betaHatSe = trianMcp(Z, Y, lambdaSeq(seIdx), tau, p, 1.0 / n, h, h1, h2, phi0, gamma, epsilon, iteMax, iteTight, para);
+  betaHatSe.rows(1, p) %= sx1;
+  betaHatSe(0) += my - arma::as_scalar(mx * betaHatSe.rows(1, p));
+  return Rcpp::List::create(Rcpp::Named("coeff") = betaHat, Rcpp::Named("coeffSe") = betaHatSe, Rcpp::Named("lambdaMin") = lambdaSeq(cvIdx), 
+                            Rcpp::Named("lambdaSe") = lambdaSeq(seIdx), Rcpp::Named("deviance") = dev, Rcpp::Named("devianceSd") = devsq);
 }
 

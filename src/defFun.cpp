@@ -28,13 +28,13 @@ arma::vec softThresh(const arma::vec& x, const arma::vec& Lambda, const int p) {
 }
 
 // [[Rcpp::export]]
-double lossQr(const arma::mat& Z, const arma::vec& Y, const arma::vec& beta, const double tau) {
+void lossQr(const arma::mat& Z, const arma::vec& Y, const arma::vec& beta, const double tau, const int i, arma::vec& dev, arma::vec& devsq) {
   arma::vec res = Y - Z * beta;
-  double rst = 0.0;
-  for (int i = 0; i < res.size(); i++) {
-    rst += res(i) >= 0 ? tau * res(i) : (tau - 1) * res(i);
+  for (int k = 0; k < res.size(); k++) {
+    double temp =  res(k) >= 0 ? tau * res(k) : (tau - 1) * res(k);
+    dev(i) += temp;
+    devsq(i) += temp * temp;
   }
-  return rst;
 }
 
 // [[Rcpp::export]]
