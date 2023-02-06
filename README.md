@@ -11,13 +11,24 @@ In the low-dimensional setting, efficient gradient-based methods are employed fo
 
 ## Updates
 
+**2023-02-05 (Version 1.3.2)**:
+
+Fix bugs in the `conquer.reg` function:
+
+1. When the penalties were group lasso, sparse group lasso or elastic-net, and the input *&lambda;* was a sequence, the estimated coefficients were not reasonable. This bug was caused because the final output (coefficients) were not updated along the sequential input of *&lambda;*.
+
+2. When the input *&lambda;* was a sequence, the output estimation was a vector instead of a matrix, which was not consistent with the description of the function.
+
+The above bugs didn't affect cross-validation (`conquer.cv.reg`), or `conquer.reg` with other penalties or when input *&lambda;* was a scalar. 
+Major functionalities of the `conquer` package were not impacted.
+
 **2022-09-12 (Version 1.3.1)**:
 
-Add flexibility into the conquer function:
+Add flexibility into the `conquer` function:
 
 1. The step size of Barzilai-Borweincan gradient descent can be unbounded, or the upper bound can be user-specified.
 
-2. The smothing bandwidth can be specified as any positive value. In previous versions, it has to be bounded away from zero. 
+2. The smoothing bandwidth can be specified as any positive value. In previous versions, it has to be bounded away from zero. 
 
 **2022-03-24 (Version 1.3.0)**:
 
@@ -64,8 +75,6 @@ install.packages("conquer")
 It usually takes several days to build a binary package after we submit a source packge to CRAN. During that time period, only a source package for the new version is available. However, installing source packges (especially Rcpp-based ones) may cause various compilation errors. Hence, when users see the prompt "There is a binary version available but the source version is later. Do you want to install from sources the package which needs compilation?", we strongly recommend selecting **no**.
 
 Below are a collection of error / warning messages and their solutions:
-
-* Error: Compilation failed for package 'conquer' (with messages involving lgfortran, clang, etc.). **Solution**: This is a compilation error of Rcpp-based source packages. It happens when we recently submit a new version to CRAN, but it usually takes 3-5 days to build the binary package. Please use an older version or patiently wait for 3-5 days and then install the updated version.
 
 * Error: smqr.cpp: 'quantile' is not a member of 'arma’. **Solution**: 'quantile' function was added into `RcppArmadillo` version 0.9.850.1.0 (2020-02-09), so reinstalling / updating the library `RcppArmadillo` will fix this issue.
 
@@ -189,7 +198,7 @@ GPL-3.0
 
 ## System requirements 
 
-C++11
+C++17
 
 ## Authors
 
@@ -209,11 +218,11 @@ Fan, J., Liu, H., Sun, Q. and Zhang, T. (2018). I-LAMM for sparse learning: Simu
 
 Fernandes, M., Guerre, E. and Horta, E. (2021). Smoothing quantile regressions. *J. Bus. Econ. Statist.* **39** 338-357, [Paper](https://www.tandfonline.com/doi/full/10.1080/07350015.2019.1660177)
 
-He, X., Pan, X., Tan, K. M., and Zhou, W.-X. (2022). Smoothed quantile regression with large-scale inference. *J. Econometrics*, to appear. [Paper](https://doi.org/10.1016/j.jeconom.2021.07.010)
+He, X., Pan, X., Tan, K. M., and Zhou, W.-X. (2023). Smoothed quantile regression with large-scale inference. *J. Econometrics*, **232**(2) 367-388, [Paper](https://doi.org/10.1016/j.jeconom.2021.07.010)
 
 Koenker, R. (2005). Quantile Regression. Cambridge Univ. Press, Cambridge. [Book](https://www.cambridge.org/core/books/quantile-regression/C18AE7BCF3EC43C16937390D44A328B1)
 
-Koenker, R. and Bassett, G. (1978). Regression quantiles. *Econometrica* **46** 33-50. [Paper](https://www.jstor.org/stable/1913643?seq=1#metadata_info_tab_contents)
+Koenker, R. and Bassett, G. (1978). Regression quantiles. *Econometrica* **46** 33-50. [Paper](https://doi.org/10.2307/1913643)
 
 Portnoy, S. and Koenker, R. (1997). The Gaussian hare and the Laplacian tortoise: Computability of squared-error versus absolute-error estimators. *Statist. Sci.* **12** 279–300. [Paper](https://projecteuclid.org/euclid.ss/1030037960)
 
