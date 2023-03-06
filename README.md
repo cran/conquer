@@ -11,16 +11,19 @@ In the low-dimensional setting, efficient gradient-based methods are employed fo
 
 ## Updates
 
+**2023-03-05 (Version 1.3.3)**:
+
+When calling `conquer` function with `ci = "asymptotic"`, an *n* by *n* diagonal matrix was involved for estimating asymptotic covariance matrix. This space allocation was expensive and unnecessary. In practice, on data with large *n*, computing the asymptotic confidence interval was infeasible.
+
+This issue is mitigated via a more computationally efficient matrix multiplication. The space complexity is released from *O(n<sup>2</sup>)* to *O(np)*.
+
 **2023-02-05 (Version 1.3.2)**:
 
-Fix bugs in the `conquer.reg` function:
+1. Fix an issue in the `conquer.reg` function: when the penalties were group lasso, sparse group lasso or elastic-net, and the input *&lambda;* was a sequence, the estimated coefficients were not reasonable. This didn't affect cross-validation (`conquer.cv.reg`), or `conquer.reg` with other penalties or when input *&lambda;* was a scalar. 
 
-1. When the penalties were group lasso, sparse group lasso or elastic-net, and the input *&lambda;* was a sequence, the estimated coefficients were not reasonable. This bug was caused because the final output (coefficients) were not updated along the sequential input of *&lambda;*.
+2. When the input *&lambda;* of `conquer.reg` function was a sequence, the output estimation was a vector instead of a matrix, which was not consistent with the description of the function.
 
-2. When the input *&lambda;* was a sequence, the output estimation was a vector instead of a matrix, which was not consistent with the description of the function.
-
-The above bugs didn't affect cross-validation (`conquer.cv.reg`), or `conquer.reg` with other penalties or when input *&lambda;* was a scalar. 
-Major functionalities of the `conquer` package were not impacted.
+3. Update the default version of C++ as required by CRAN.
 
 **2022-09-12 (Version 1.3.1)**:
 

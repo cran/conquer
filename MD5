@@ -1,10 +1,10 @@
-3ba7007504719e24798556f10663ad0f *DESCRIPTION
+38ee3f5a801d3ba6ddeb9d92a97df7b8 *DESCRIPTION
 b3b431554910a9201415b792bf0c4fa5 *NAMESPACE
-d6401fb7a3e58b9593920f6454c3627c *R/RcppExports.R
+aec49d2f04c59bff4727dea4fd9f0fd7 *R/RcppExports.R
 e3a7585aacce394633d9dd7013a10bd0 *R/conquer-package.R
 117fcb0051657c459624d6d8bc6d5101 *R/generate_ns.R
-4d8aa16262e068b5297762cd429bc6e8 *R/smqr.R
-fade4eaa501967aaa976019b1a69c785 *README.md
+5eb45dc17e430e7c1b2558fa673d2f03 *R/smqr.R
+8402e96a1461efc8fba7a7f156007df1 *README.md
 072cd03166b475cc1e2c9dc574255619 *man/conquer-package.Rd
 ce36a5b9a2e52e7351f9429217325102 *man/conquer.Rd
 09d053945f58da0e5a1ff734b1a7c708 *man/conquer.cv.reg.Rd
@@ -12,7 +12,7 @@ ce36a5b9a2e52e7351f9429217325102 *man/conquer.Rd
 68ef8738e0d80c4ba232d865f64d7769 *man/conquer.reg.Rd
 034fd25b16df0b2fd1758a37d8ccb855 *src/Makevars
 034fd25b16df0b2fd1758a37d8ccb855 *src/Makevars.win
-55723caaade27d512fc32c5ea375f6bb *src/RcppExports.cpp
+4d4d10dc8c74ad2aab1e73ad3b1287c8 *src/RcppExports.cpp
 35c45448ba6a0447e56bfdcf0a74b417 *src/basicOp.h
 4ac8aa2c56c19924f0db7d87c2f30954 *src/defFun.cpp
 24dbee1d71b63cdf8c85cdbfd46ff9bf *src/highdGauss.cpp
@@ -20,4 +20,4 @@ ce36a5b9a2e52e7351f9429217325102 *man/conquer.Rd
 d4093639999da0aaa2e8cb29f623979a *src/highdPara.cpp
 fdc7bae902ff6e54233525fdc5ecd893 *src/highdTrian.cpp
 62ab5332f1181b74a2283b34f7e45448 *src/highdUnif.cpp
-41bfd4e180ec2f4d75ca2a87a9bbd020 *src/lowd.cpp
+b9a6b0943d588e5dc809b030ffb39302 *src/lowd.cpp
